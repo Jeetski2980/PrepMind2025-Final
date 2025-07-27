@@ -39,9 +39,9 @@ export default function About() {
                 <div className="w-12 h-12 bg-blue-100 dark:bg-emerald-400/10 rounded-full flex items-center justify-center mb-4">
                   <Brain className="w-6 h-6 text-blue-600 dark:text-emerald-400" />
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">The AI Engine: GPT-4</h3>
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">The AI Engine: Together AI</h3>
                 <p className="text-gray-600 dark:text-white/70">
-                  Our platform leverages OpenAI's GPT-4 API to generate unlimited, unique practice questions across different subjects. This ensures highly relevant content for your prep.
+                  Our platform leverages Together AI's advanced language models to generate unlimited, unique practice questions across different subjects. This ensures highly relevant, cost-effective content for your prep.
                 </p>
               </CardContent>
             </Card>
