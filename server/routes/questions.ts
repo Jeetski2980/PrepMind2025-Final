@@ -1,5 +1,5 @@
 import { RequestHandler } from "express";
-import { generateQuestions } from "../services/openai";
+import { generateQuestions } from "../services/together";
 
 export const handleGenerateQuestions: RequestHandler = async (req, res) => {
   try {
@@ -22,13 +22,18 @@ export const handleGenerateQuestions: RequestHandler = async (req, res) => {
       });
     }
 
-    console.log(`Generating ${questionCount} questions for ${testType} ${subject}${topic ? ` - ${topic}` : ''}`);
+    // Security: Sanitize inputs to prevent injection
+    const sanitizedTestType = testType.replace(/[<>\"'&]/g, '');
+    const sanitizedSubject = subject.replace(/[<>\"'&]/g, '');
+    const sanitizedTopic = topic ? topic.replace(/[<>\"'&]/g, '') : undefined;
 
-    // Generate questions using OpenAI
+    console.log(`Generating ${questionCount} questions for ${sanitizedTestType} ${sanitizedSubject}${sanitizedTopic ? ` - ${sanitizedTopic}` : ''}`);
+
+    // Generate questions using Together AI
     const questions = await generateQuestions({
-      testType,
-      subject,
-      topic: topic || undefined,
+      testType: sanitizedTestType,
+      subject: sanitizedSubject,
+      topic: sanitizedTopic,
       numQuestions: questionCount
     });
 
@@ -37,9 +42,9 @@ export const handleGenerateQuestions: RequestHandler = async (req, res) => {
     res.json({
       success: true,
       questions,
-      testType,
-      subject,
-      topic: topic || "General"
+      testType: sanitizedTestType,
+      subject: sanitizedSubject,
+      topic: sanitizedTopic || "General"
     });
 
   } catch (error) {
