@@ -40,11 +40,13 @@ git push -u origin main
 3. **Select "Web Service"**
 
 4. **Connect Your Repository**:
+
    - Choose "Connect a repository"
    - Select your GitHub account
    - Choose the repository containing your PrepMind code
 
 5. **Configure the Service**:
+
    ```
    Name: prepmind (or your preferred name)
    Region: Oregon (US West) - recommended for free tier
@@ -63,9 +65,9 @@ git push -u origin main
 
 In the Render dashboard, scroll down to **Environment Variables** and add:
 
-| Key | Value |
-|-----|-------|
-| `NODE_ENV` | `production` |
+| Key                | Value                                                |
+| ------------------ | ---------------------------------------------------- |
+| `NODE_ENV`         | `production`                                         |
 | `TOGETHER_API_KEY` | `tgp_v1_DW5qZ_ru5HyihziiZ7Um59gO-Dita3opk_vCNXCpncE` |
 
 ⚠️ **Important**: Make sure to use your actual Together AI API key
@@ -79,6 +81,7 @@ In the Render dashboard, scroll down to **Environment Variables** and add:
 ### 5. Access Your Application
 
 Once deployed, Render will provide you with a URL like:
+
 ```
 https://prepmind.onrender.com
 ```
@@ -94,16 +97,19 @@ The following files have been added to support Render deployment:
 ## 🚨 Important Notes
 
 ### Free Tier Limitations
+
 - **Sleep Mode**: Free services sleep after 15 minutes of inactivity
 - **Cold Starts**: First request after sleeping takes 10-30 seconds
 - **750 hours/month**: Enough for personal projects and demos
 
 ### Performance Tips
+
 - The app will "wake up" on first visit each day
 - Consider upgrading to paid tier for production use
 - Monitor usage in Render dashboard
 
 ### Security
+
 - Environment variables are secure and encrypted
 - Together AI API key is safely stored
 - No sensitive data in repository
@@ -111,16 +117,19 @@ The following files have been added to support Render deployment:
 ## 🛠️ Troubleshooting
 
 ### Build Fails
+
 1. Check the build logs in Render dashboard
 2. Ensure all dependencies are in `package.json`
 3. Verify Node.js version compatibility
 
 ### App Won't Start
+
 1. Check if `npm start` works locally
 2. Verify environment variables are set
 3. Check server logs for errors
 
 ### AI Features Not Working
+
 1. Verify `TOGETHER_API_KEY` is correctly set
 2. Check API key has sufficient credits
 3. Monitor API usage in Together AI dashboard

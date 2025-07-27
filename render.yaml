@@ -10,5 +10,5 @@ services:
       - key: NODE_ENV
         value: production
       - key: TOGETHER_API_KEY
-        sync: false  # This will need to be set manually in Render dashboard
+        sync: false # This will need to be set manually in Render dashboard
     autoDeploy: true
