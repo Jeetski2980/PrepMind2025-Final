@@ -2,6 +2,8 @@ import "dotenv/config";
 import express from "express";
 import cors from "cors";
 import { handleDemo } from "./routes/demo";
+import { handleGenerateQuestions } from "./routes/questions";
+import { handleChat } from "./routes/chat";
 
 export function createServer() {
   const app = express();
@@ -18,6 +20,10 @@ export function createServer() {
   });
 
   app.get("/api/demo", handleDemo);
+
+  // PrepMind API routes
+  app.post("/api/generate-questions", handleGenerateQuestions);
+  app.post("/api/chat", handleChat);
 
   return app;
 }
