@@ -179,6 +179,8 @@ export default function Tutor() {
             </p>
           </div>
 
+          <ApiKeyNotice />
+
           {/* Chat Container */}
           <Card className="bg-white dark:bg-black border dark:border-white/30 h-[600px] flex flex-col">
             {/* Messages */}
