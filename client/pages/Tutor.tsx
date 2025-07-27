@@ -4,6 +4,7 @@ import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { MessageSquare, Send, Mic, MicOff, Volume2, VolumeX, User, Bot } from "lucide-react";
 import Layout from "@/components/Layout";
+import ApiKeyNotice from "@/components/ApiKeyNotice";
 
 interface Message {
   id: number;
