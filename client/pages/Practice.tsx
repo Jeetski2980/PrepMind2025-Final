@@ -5,6 +5,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { BookOpen, CheckCircle, XCircle, Lightbulb, RotateCcw } from "lucide-react";
 import Layout from "@/components/Layout";
+import ApiKeyNotice from "@/components/ApiKeyNotice";
 
 interface Question {
   id: number;
