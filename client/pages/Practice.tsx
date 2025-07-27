@@ -137,8 +137,10 @@ export default function Practice() {
           </div>
 
           {questions.length === 0 ? (
-            /* Question Generation Form */
-            <Card className="bg-white dark:bg-black border dark:border-white/20">
+            <div>
+              <ApiKeyNotice />
+              {/* Question Generation Form */}
+              <Card className="bg-white dark:bg-black border dark:border-white/20">
               <CardHeader>
                 <CardTitle className="text-gray-900 dark:text-white">Choose Your Test</CardTitle>
               </CardHeader>
@@ -242,6 +244,7 @@ export default function Practice() {
                 </Button>
               </CardContent>
             </Card>
+            </div>
           ) : (
             /* Questions Display */
             <div className="space-y-6">
