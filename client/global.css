@@ -77,6 +77,26 @@
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground transition-colors duration-300;
+  }
+
+  /* Enhanced dark mode overrides */
+  .dark body {
+    background-color: #000000 !important;
+    color: #ffffff !important;
+  }
+
+  /* Ensure all cards and components get proper dark styling */
+  .dark [data-radix-select-content] {
+    background-color: #000000 !important;
+    border-color: rgba(255, 255, 255, 0.2) !important;
+  }
+
+  .dark [data-radix-select-item] {
+    color: #ffffff !important;
+  }
+
+  .dark [data-radix-select-item]:hover {
+    background-color: rgba(16, 185, 129, 0.1) !important;
   }
 }
