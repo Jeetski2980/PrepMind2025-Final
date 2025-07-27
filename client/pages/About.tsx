@@ -109,9 +109,9 @@ export default function About() {
                   <h3 className="text-lg font-semibold text-gray-900 dark:text-emerald-400 mb-4">Backend & AI</h3>
                   <ul className="space-y-2 text-gray-600 dark:text-white/70">
                     <li>• Node.js server infrastructure</li>
-                    <li>• OpenAI GPT-4 API integration</li>
+                    <li>• Together AI API integration</li>
                     <li>• RESTful API endpoints</li>
-                    <li>• Secure API management</li>
+                    <li>• Secure API management with content filtering</li>
                     <li>• Real-time content generation</li>
                   </ul>
                 </div>
