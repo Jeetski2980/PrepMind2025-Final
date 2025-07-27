@@ -2,7 +2,16 @@ import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
-import { MessageSquare, Send, Mic, MicOff, Volume2, VolumeX, User, Bot } from "lucide-react";
+import {
+  MessageSquare,
+  Send,
+  Mic,
+  MicOff,
+  Volume2,
+  VolumeX,
+  User,
+  Bot,
+} from "lucide-react";
 import Layout from "@/components/Layout";
 import ApiKeyNotice from "@/components/ApiKeyNotice";
 
@@ -19,8 +28,8 @@ export default function Tutor() {
       id: 1,
       text: "Hi! I'm here to help you understand SAT, ACT, and AP exam concepts. Try typing or using your voice to ask me anything about test prep!",
       isUser: false,
-      timestamp: new Date()
-    }
+      timestamp: new Date(),
+    },
   ]);
   const [inputText, setInputText] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -36,12 +45,13 @@ export default function Tutor() {
 
   useEffect(() => {
     // Initialize speech recognition
-    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-      const SpeechRecognition = window.webkitSpeechRecognition || window.SpeechRecognition;
+    if ("webkitSpeechRecognition" in window || "SpeechRecognition" in window) {
+      const SpeechRecognition =
+        window.webkitSpeechRecognition || window.SpeechRecognition;
       recognitionRef.current = new SpeechRecognition();
       recognitionRef.current.continuous = false;
       recognitionRef.current.interimResults = false;
-      recognitionRef.current.lang = 'en-US';
+      recognitionRef.current.lang = "en-US";
 
       recognitionRef.current.onresult = (event) => {
         const transcript = event.results[0][0].transcript;
@@ -95,7 +105,7 @@ export default function Tutor() {
       utterance.rate = 0.9;
       utterance.pitch = 1;
       utterance.volume = 0.8;
-      
+
       utterance.onstart = () => setIsSpeaking(true);
       utterance.onend = () => setIsSpeaking(false);
       utterance.onerror = () => setIsSpeaking(false);
@@ -118,18 +128,18 @@ export default function Tutor() {
       id: Date.now(),
       text: inputText.trim(),
       isUser: true,
-      timestamp: new Date()
+      timestamp: new Date(),
     };
 
-    setMessages(prev => [...prev, userMessage]);
+    setMessages((prev) => [...prev, userMessage]);
     setInputText("");
     setIsLoading(true);
 
     try {
-      const response = await fetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: userMessage.text })
+      const response = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: userMessage.text }),
       });
 
       if (response.ok) {
@@ -138,27 +148,27 @@ export default function Tutor() {
           id: Date.now() + 1,
           text: data.response,
           isUser: false,
-          timestamp: new Date()
+          timestamp: new Date(),
         };
-        setMessages(prev => [...prev, aiMessage]);
+        setMessages((prev) => [...prev, aiMessage]);
       } else {
-        throw new Error('Failed to get response');
+        throw new Error("Failed to get response");
       }
     } catch (error) {
       const errorMessage: Message = {
         id: Date.now() + 1,
         text: "I'm sorry, I'm having trouble connecting right now. Please try again later.",
         isUser: false,
-        timestamp: new Date()
+        timestamp: new Date(),
       };
-      setMessages(prev => [...prev, errorMessage]);
+      setMessages((prev) => [...prev, errorMessage]);
     }
 
     setIsLoading(false);
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
+    if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       sendMessage();
     }
@@ -173,7 +183,9 @@ export default function Tutor() {
             <div className="w-16 h-16 bg-emerald-100 dark:bg-emerald-400/10 rounded-full flex items-center justify-center mx-auto mb-4">
               <MessageSquare className="w-8 h-8 text-emerald-600 dark:text-emerald-400" />
             </div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Your AI Tutor</h1>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+              Your AI Tutor
+            </h1>
             <p className="text-gray-600 dark:text-white/70">
               Ask me anything about test prep. Try typing or using your voice.
             </p>
@@ -188,19 +200,19 @@ export default function Tutor() {
               {messages.map((message) => (
                 <div
                   key={message.id}
-                  className={`flex ${message.isUser ? 'justify-end' : 'justify-start'}`}
+                  className={`flex ${message.isUser ? "justify-end" : "justify-start"}`}
                 >
                   <div
                     className={`max-w-[80%] flex items-start space-x-3 ${
-                      message.isUser ? 'flex-row-reverse space-x-reverse' : ''
+                      message.isUser ? "flex-row-reverse space-x-reverse" : ""
                     }`}
                   >
                     {/* Avatar */}
                     <div
                       className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
                         message.isUser
-                          ? 'bg-white dark:bg-white text-emerald-600 dark:text-black'
-                          : 'bg-emerald-400 dark:bg-emerald-400 text-white dark:text-black'
+                          ? "bg-white dark:bg-white text-emerald-600 dark:text-black"
+                          : "bg-emerald-400 dark:bg-emerald-400 text-white dark:text-black"
                       }`}
                     >
                       {message.isUser ? (
@@ -214,8 +226,8 @@ export default function Tutor() {
                     <div
                       className={`p-4 rounded-2xl ${
                         message.isUser
-                          ? 'bg-emerald-600 dark:bg-white text-white dark:text-black rounded-br-md'
-                          : 'bg-white dark:bg-black border dark:border-white/30 text-gray-900 dark:text-white rounded-bl-md'
+                          ? "bg-emerald-600 dark:bg-white text-white dark:text-black rounded-br-md"
+                          : "bg-white dark:bg-black border dark:border-white/30 text-gray-900 dark:text-white rounded-bl-md"
                       }`}
                     >
                       <p className="whitespace-pre-wrap">{message.text}</p>
@@ -223,7 +235,11 @@ export default function Tutor() {
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => isSpeaking ? stopSpeaking() : speakText(message.text)}
+                          onClick={() =>
+                            isSpeaking
+                              ? stopSpeaking()
+                              : speakText(message.text)
+                          }
                           className="mt-2 p-1 h-6 w-6 hover:bg-gray-100 dark:hover:bg-white/10"
                         >
                           {isSpeaking ? (
@@ -247,8 +263,14 @@ export default function Tutor() {
                     <div className="bg-white dark:bg-black border dark:border-white/30 p-4 rounded-2xl rounded-bl-md">
                       <div className="flex space-x-1">
                         <div className="w-2 h-2 bg-gray-400 dark:bg-white/50 rounded-full animate-bounce" />
-                        <div className="w-2 h-2 bg-gray-400 dark:bg-white/50 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }} />
-                        <div className="w-2 h-2 bg-gray-400 dark:bg-white/50 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }} />
+                        <div
+                          className="w-2 h-2 bg-gray-400 dark:bg-white/50 rounded-full animate-bounce"
+                          style={{ animationDelay: "0.1s" }}
+                        />
+                        <div
+                          className="w-2 h-2 bg-gray-400 dark:bg-white/50 rounded-full animate-bounce"
+                          style={{ animationDelay: "0.2s" }}
+                        />
                       </div>
                     </div>
                   </div>
@@ -275,10 +297,16 @@ export default function Tutor() {
                     size="sm"
                     onClick={isListening ? stopListening : startListening}
                     className={`absolute bottom-2 right-2 p-2 h-8 w-8 ${
-                      isListening ? 'text-red-500 dark:text-red-400' : 'text-gray-500 dark:text-white hover:text-emerald-600 dark:hover:text-emerald-400'
+                      isListening
+                        ? "text-red-500 dark:text-red-400"
+                        : "text-gray-500 dark:text-white hover:text-emerald-600 dark:hover:text-emerald-400"
                     }`}
                   >
-                    {isListening ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
+                    {isListening ? (
+                      <MicOff className="w-4 h-4" />
+                    ) : (
+                      <Mic className="w-4 h-4" />
+                    )}
                   </Button>
                 </div>
                 <Button

@@ -9,7 +9,8 @@ export const handleGenerateQuestions: RequestHandler = async (req, res) => {
     if (!testType || !subject || !numQuestions) {
       return res.status(400).json({
         success: false,
-        error: 'Missing required fields: testType, subject, and numQuestions are required'
+        error:
+          "Missing required fields: testType, subject, and numQuestions are required",
       });
     }
 
@@ -18,23 +19,25 @@ export const handleGenerateQuestions: RequestHandler = async (req, res) => {
     if (isNaN(questionCount) || questionCount < 1 || questionCount > 25) {
       return res.status(400).json({
         success: false,
-        error: 'numQuestions must be a number between 1 and 25'
+        error: "numQuestions must be a number between 1 and 25",
       });
     }
 
     // Security: Sanitize inputs to prevent injection
-    const sanitizedTestType = testType.replace(/[<>\"'&]/g, '');
-    const sanitizedSubject = subject.replace(/[<>\"'&]/g, '');
-    const sanitizedTopic = topic ? topic.replace(/[<>\"'&]/g, '') : undefined;
+    const sanitizedTestType = testType.replace(/[<>\"'&]/g, "");
+    const sanitizedSubject = subject.replace(/[<>\"'&]/g, "");
+    const sanitizedTopic = topic ? topic.replace(/[<>\"'&]/g, "") : undefined;
 
-    console.log(`Generating ${questionCount} questions for ${sanitizedTestType} ${sanitizedSubject}${sanitizedTopic ? ` - ${sanitizedTopic}` : ''}`);
+    console.log(
+      `Generating ${questionCount} questions for ${sanitizedTestType} ${sanitizedSubject}${sanitizedTopic ? ` - ${sanitizedTopic}` : ""}`,
+    );
 
     // Generate questions using Together AI
     const questions = await generateQuestions({
       testType: sanitizedTestType,
       subject: sanitizedSubject,
       topic: sanitizedTopic,
-      numQuestions: questionCount
+      numQuestions: questionCount,
     });
 
     console.log(`Successfully generated ${questions.length} questions`);
@@ -44,15 +47,14 @@ export const handleGenerateQuestions: RequestHandler = async (req, res) => {
       questions,
       testType: sanitizedTestType,
       subject: sanitizedSubject,
-      topic: sanitizedTopic || "General"
+      topic: sanitizedTopic || "General",
     });
-
   } catch (error) {
-    console.error('Error in handleGenerateQuestions:', error);
-    
+    console.error("Error in handleGenerateQuestions:", error);
+
     res.status(500).json({
       success: false,
-      error: 'Failed to generate questions. Please try again.'
+      error: "Failed to generate questions. Please try again.",
     });
   }
 };
