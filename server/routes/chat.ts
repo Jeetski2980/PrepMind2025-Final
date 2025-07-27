@@ -1,5 +1,5 @@
 import { RequestHandler } from "express";
-import { generateChatResponse } from "../services/openai";
+import { generateChatResponse } from "../services/together";
 
 export const handleChat: RequestHandler = async (req, res) => {
   try {
@@ -13,7 +13,7 @@ export const handleChat: RequestHandler = async (req, res) => {
       });
     }
 
-    // Check message length
+    // Security: Check message length and sanitize
     if (message.length > 1000) {
       return res.status(400).json({
         success: false,
@@ -21,10 +21,27 @@ export const handleChat: RequestHandler = async (req, res) => {
       });
     }
 
-    console.log(`Processing chat message: "${message.substring(0, 50)}..."`);
+    // Security: Basic content filtering to prevent abuse
+    const lowercaseMessage = message.toLowerCase();
+    const inappropriateContent = [
+      'hack', 'exploit', 'malware', 'virus', 'ddos', 'attack',
+      'illegal', 'drugs', 'violence', 'harm', 'suicide'
+    ];
+    
+    if (inappropriateContent.some(word => lowercaseMessage.includes(word))) {
+      return res.json({
+        success: true,
+        response: "I'm designed to help with test preparation and academic subjects. Please ask questions related to SAT, ACT, or AP exam preparation, and I'll be happy to help!"
+      });
+    }
 
-    // Generate AI response
-    const response = await generateChatResponse(message.trim());
+    // Sanitize message to prevent injection
+    const sanitizedMessage = message.replace(/[<>\"'&]/g, '').trim();
+
+    console.log(`Processing chat message: "${sanitizedMessage.substring(0, 50)}..."`);
+
+    // Generate AI response using Together AI
+    const response = await generateChatResponse(sanitizedMessage);
 
     console.log(`Generated response length: ${response.length} characters`);
 
