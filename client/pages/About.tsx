@@ -88,8 +88,7 @@ export default function About() {
                 </h3>
                 <p className="text-gray-600 dark:text-white/70">
                   The platform is hosted on secure cloud infrastructure with
-                  proper SSL certificates and is developed and maintained by
-                  experienced developers to ensure reliability and safety.
+                  proper SSL certificates and is developed to ensure reliability and safety.
                 </p>
               </CardContent>
             </Card>
