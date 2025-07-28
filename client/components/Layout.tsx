@@ -1,35 +1,42 @@
-import { useState, useEffect, ReactNode } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Brain, Sun, Moon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-interface LayoutProps {
-  children: ReactNode;
-}
-
-export default function Layout({ children }: LayoutProps) {
+export default function Layout({ children }) {
   const location = useLocation();
   const [isDarkMode, setIsDarkMode] = useState(false);
 
+  // Check for saved theme preference on load
   useEffect(() => {
     const savedTheme = localStorage.getItem("theme");
-    const prefersDark = window.matchMedia(
-      "(prefers-color-scheme: dark)",
-    ).matches;
-    const shouldUseDark = savedTheme === "dark" || (!savedTheme && prefersDark);
-
-    setIsDarkMode(shouldUseDark);
-    document.documentElement.classList.toggle("dark", shouldUseDark);
+    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    
+    if (savedTheme === "dark" || (!savedTheme && prefersDark)) {
+      setIsDarkMode(true);
+      document.documentElement.classList.add("dark");
+    }
   }, []);
 
-  const toggleDarkMode = () => {
-    const newDarkMode = !isDarkMode;
-    setIsDarkMode(newDarkMode);
-    localStorage.setItem("theme", newDarkMode ? "dark" : "light");
-    document.documentElement.classList.toggle("dark", newDarkMode);
+  const handleThemeToggle = () => {
+    const newTheme = !isDarkMode;
+    setIsDarkMode(newTheme);
+    localStorage.setItem("theme", newTheme ? "dark" : "light");
+    
+    if (newTheme) {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
   };
 
-  const isActive = (path: string) => location.pathname === path;
+  const navLinkClass = (path) => {
+    const baseClass = "px-3 py-2 rounded-md text-sm font-medium transition-colors";
+    const activeClass = "bg-emerald-100 dark:bg-emerald-400/10 text-emerald-700 dark:text-emerald-400";
+    const inactiveClass = "text-gray-600 dark:text-white hover:text-emerald-700 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-400/10";
+    
+    return `${baseClass} ${location.pathname === path ? activeClass : inactiveClass}`;
+  };
 
   return (
     <div className="min-h-screen bg-white dark:bg-black text-gray-900 dark:text-white transition-colors">
@@ -44,52 +51,22 @@ export default function Layout({ children }: LayoutProps) {
               </div>
               <span className="text-xl font-bold">
                 <span className="text-gray-900 dark:text-white">PrepMind</span>
-                <span className="text-emerald-600 dark:text-emerald-400">
-                  .org
-                </span>
+                <span className="text-emerald-600 dark:text-emerald-400">.org</span>
               </span>
             </Link>
 
             {/* Navigation */}
             <nav className="hidden md:flex items-center space-x-6">
-              <Link
-                to="/"
-                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                  isActive("/")
-                    ? "bg-emerald-100 dark:bg-emerald-400/10 text-emerald-700 dark:text-emerald-400"
-                    : "text-gray-600 dark:text-white hover:text-emerald-700 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-400/10"
-                }`}
-              >
+              <Link to="/" className={navLinkClass("/")}>
                 Home
               </Link>
-              <Link
-                to="/practice"
-                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                  isActive("/practice")
-                    ? "bg-emerald-100 dark:bg-emerald-400/10 text-emerald-700 dark:text-emerald-400"
-                    : "text-gray-600 dark:text-white hover:text-emerald-700 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-400/10"
-                }`}
-              >
+              <Link to="/practice" className={navLinkClass("/practice")}>
                 AI Practice
               </Link>
-              <Link
-                to="/tutor"
-                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                  isActive("/tutor")
-                    ? "bg-emerald-100 dark:bg-emerald-400/10 text-emerald-700 dark:text-emerald-400"
-                    : "text-gray-600 dark:text-white hover:text-emerald-700 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-400/10"
-                }`}
-              >
+              <Link to="/tutor" className={navLinkClass("/tutor")}>
                 AI Tutor
               </Link>
-              <Link
-                to="/about"
-                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                  isActive("/about")
-                    ? "bg-emerald-100 dark:bg-emerald-400/10 text-emerald-700 dark:text-emerald-400"
-                    : "text-gray-600 dark:text-white hover:text-emerald-700 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-400/10"
-                }`}
-              >
+              <Link to="/about" className={navLinkClass("/about")}>
                 About
               </Link>
             </nav>
@@ -98,14 +75,10 @@ export default function Layout({ children }: LayoutProps) {
             <Button
               variant="ghost"
               size="sm"
-              onClick={toggleDarkMode}
+              onClick={handleThemeToggle}
               className="p-2 text-gray-600 dark:text-white hover:text-emerald-700 dark:hover:text-emerald-400"
             >
-              {isDarkMode ? (
-                <Sun className="w-5 h-5" />
-              ) : (
-                <Moon className="w-5 h-5" />
-              )}
+              {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
             </Button>
           </div>
         </div>
@@ -118,32 +91,23 @@ export default function Layout({ children }: LayoutProps) {
       <footer className="bg-gray-50 dark:bg-black border-t border-gray-200 dark:border-white/20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            {/* Logo and description */}
             <div className="col-span-1 md:col-span-2">
               <div className="flex items-center space-x-2 mb-4">
                 <div className="w-8 h-8 bg-gradient-to-br from-emerald-500 to-green-600 rounded-lg flex items-center justify-center">
                   <Brain className="w-5 h-5 text-white" />
                 </div>
                 <span className="text-xl font-bold">
-                  <span className="text-gray-900 dark:text-white">
-                    PrepMind
-                  </span>
-                  <span className="text-emerald-600 dark:text-emerald-400">
-                    .org
-                  </span>
+                  <span className="text-gray-900 dark:text-white">PrepMind</span>
+                  <span className="text-emerald-600 dark:text-emerald-400">.org</span>
                 </span>
               </div>
               <p className="text-gray-600 dark:text-white/70 mb-4">
-                Free AI-powered practice for SAT, ACT, and AP exams. Prep
-                smarter, not harder.
+                Free AI-powered practice for SAT, ACT, and AP exams. Prep smarter, not harder.
               </p>
             </div>
 
-            {/* Features */}
             <div>
-              <h3 className="font-semibold text-gray-900 dark:text-emerald-400 mb-4">
-                Features
-              </h3>
+              <h3 className="font-semibold text-gray-900 dark:text-emerald-400 mb-4">Features</h3>
               <ul className="space-y-2 text-gray-600 dark:text-white/70">
                 <li>AI-Generated Questions</li>
                 <li>Instant Explanations</li>
@@ -151,11 +115,8 @@ export default function Layout({ children }: LayoutProps) {
               </ul>
             </div>
 
-            {/* Supported Tests */}
             <div>
-              <h3 className="font-semibold text-gray-900 dark:text-emerald-400 mb-4">
-                Supported Tests
-              </h3>
+              <h3 className="font-semibold text-gray-900 dark:text-emerald-400 mb-4">Supported Tests</h3>
               <ul className="space-y-2 text-gray-600 dark:text-white/70">
                 <li>SAT (Math, Reading, Writing)</li>
                 <li>ACT (All Subjects)</li>
