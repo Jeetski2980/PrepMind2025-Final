@@ -122,8 +122,7 @@ export default function Index() {
                 </h3>
                 <p className="text-gray-600 dark:text-white/70">
                   Never wonder why an answer is correct. Get detailed,
-                  step-by-step explanations that help you understand concepts,
-                  not just memorize patterns.
+                  step-by-step explanations that help you understand concepts.
                 </p>
               </CardContent>
             </Card>
