@@ -230,7 +230,12 @@ export default function Tutor() {
                           : "bg-white dark:bg-black border dark:border-white/30 text-gray-900 dark:text-white rounded-bl-md"
                       }`}
                     >
-                      <p className="whitespace-pre-wrap">{message.text}</p>
+                      <p
+                        className="whitespace-pre-wrap"
+                        dangerouslySetInnerHTML={{
+                          __html: message.text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                        }}
+                      />
                       {!message.isUser && (
                         <Button
                           variant="ghost"
