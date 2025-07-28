@@ -92,7 +92,7 @@ export default function Layout({ children }) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div className="col-span-1 md:col-span-2">
-              <div className="flex items-center space-x-2 mb-4">
+              <Link to="/" className="flex items-center space-x-2 mb-4">
                 <div className="w-8 h-8 bg-gradient-to-br from-emerald-500 to-green-600 rounded-lg flex items-center justify-center">
                   <Brain className="w-5 h-5 text-white" />
                 </div>
@@ -100,7 +100,7 @@ export default function Layout({ children }) {
                   <span className="text-gray-900 dark:text-white">PrepMind</span>
                   <span className="text-emerald-600 dark:text-emerald-400">.org</span>
                 </span>
-              </div>
+              </Link>
               <p className="text-gray-600 dark:text-white/70 mb-4">
                 Free AI-powered practice for SAT, ACT, and AP exams. Prep smarter, not harder.
               </p>
