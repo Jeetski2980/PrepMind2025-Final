@@ -32,7 +32,7 @@ export default function About() {
                 Our Mission
               </h2>
               <p className="text-gray-700 dark:text-white/80 text-lg">
-                We use GPT-4 to generate questions and answers in a clean,
+                We use models like Meta‑Llama‑3.1 to generate questions and answers in a clean,
                 distraction-free web app built with standard development
                 technologies like React and Node.js.
               </p>
