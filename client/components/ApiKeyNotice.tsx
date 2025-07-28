@@ -10,7 +10,7 @@ export default function ApiKeyNotice() {
             AI Powered by Together AI
           </h3>
           <p className="text-green-700 dark:text-green-400 text-sm">
-            PrepMind uses Together AI's language models to generate practice questions and provide tutoring for SAT, ACT, and AP exams.
+            PrepMind uses Together AI's language models through its API to generate practice questions and provide tutoring for SAT, ACT, and AP exams.
           </p>
         </div>
       </div>
