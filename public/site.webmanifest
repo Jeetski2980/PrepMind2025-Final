@@ -4,7 +4,7 @@
   "description": "Free AI-powered test prep for SAT, ACT, and AP exams",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#000000",
+  "background_color": "#10b981",
   "theme_color": "#10b981",
   "icons": [
     {
