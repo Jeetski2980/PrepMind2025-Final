@@ -1,111 +1,62 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import {
-  BookOpen,
-  CheckCircle,
-  XCircle,
-  Lightbulb,
-  RotateCcw,
-} from "lucide-react";
+import { BookOpen, CheckCircle, XCircle, Lightbulb, RotateCcw } from "lucide-react";
 import Layout from "@/components/Layout";
 import ApiKeyNotice from "@/components/ApiKeyNotice";
 
-interface Question {
-  id: number;
-  question: string;
-  choices: string[];
-  correct_answer: number;
-  explanation: string;
-  difficulty: string;
-}
-
-interface TestSubjects {
-  [key: string]: string[];
-}
-
-const testSubjects: TestSubjects = {
-  SAT: ["Math", "Reading", "Writing"],
-  ACT: ["Math", "Reading", "English", "Science"],
+const TEST_SUBJECTS = {
+  "SAT": ["Math", "Reading", "Writing"],
+  "ACT": ["Math", "Reading", "English", "Science"],
   "AP Exams": [
-    "Calculus AB",
-    "Calculus BC",
-    "Statistics",
-    "Physics 1",
-    "Physics 2",
-    "Physics C",
-    "Chemistry",
-    "Biology",
-    "English Language",
-    "English Literature",
-    "US History",
-    "World History",
-    "Government",
-    "Psychology",
-    "Computer Science A",
-  ],
+    "Calculus AB", "Calculus BC", "Statistics", "Physics 1", "Physics 2", 
+    "Physics C", "Chemistry", "Biology", "English Language", "English Literature",
+    "US History", "World History", "Government", "Psychology", "Computer Science A"
+  ]
 };
 
-const specificTopics: { [key: string]: string[] } = {
-  Math: ["Algebra", "Geometry", "Trigonometry", "Statistics", "Functions"],
-  Reading: ["Reading Comprehension", "Vocabulary", "Main Ideas", "Inferences"],
-  Writing: [
-    "Grammar",
-    "Sentence Structure",
-    "Essay Writing",
-    "Rhetorical Analysis",
-  ],
-  English: ["Grammar", "Punctuation", "Style", "Strategy"],
-  Science: ["Data Analysis", "Scientific Reasoning", "Research Summaries"],
+const TOPIC_OPTIONS = {
+  "Math": ["Algebra", "Geometry", "Trigonometry", "Statistics", "Functions"],
+  "Reading": ["Reading Comprehension", "Vocabulary", "Main Ideas", "Inferences"],
+  "Writing": ["Grammar", "Sentence Structure", "Essay Writing", "Rhetorical Analysis"],
+  "English": ["Grammar", "Punctuation", "Style", "Strategy"],
+  "Science": ["Data Analysis", "Scientific Reasoning", "Research Summaries"],
   "Calculus AB": ["Limits", "Derivatives", "Integrals", "Applications"],
   "Physics 1": ["Kinematics", "Forces", "Energy", "Waves"],
-  Chemistry: [
-    "Atomic Structure",
-    "Chemical Bonding",
-    "Reactions",
-    "Thermodynamics",
-  ],
-  Biology: ["Cell Biology", "Genetics", "Evolution", "Ecology"],
+  "Chemistry": ["Atomic Structure", "Chemical Bonding", "Reactions", "Thermodynamics"],
+  "Biology": ["Cell Biology", "Genetics", "Evolution", "Ecology"]
 };
 
 export default function Practice() {
-  const [testType, setTestType] = useState<string>("");
-  const [subject, setSubject] = useState<string>("");
-  const [topic, setTopic] = useState<string>("");
-  const [numQuestions, setNumQuestions] = useState<string>("5");
-  const [questions, setQuestions] = useState<Question[]>([]);
-  const [currentQuestion, setCurrentQuestion] = useState<number>(0);
-  const [selectedAnswers, setSelectedAnswers] = useState<{
-    [key: number]: number;
-  }>({});
-  const [showResults, setShowResults] = useState<boolean>(false);
-  const [isGenerating, setIsGenerating] = useState<boolean>(false);
+  const [testType, setTestType] = useState("");
+  const [subject, setSubject] = useState("");
+  const [topic, setTopic] = useState("");
+  const [numQuestions, setNumQuestions] = useState("5");
+  const [questions, setQuestions] = useState([]);
+  const [currentQuestion, setCurrentQuestion] = useState(0);
+  const [selectedAnswers, setSelectedAnswers] = useState({});
+  const [showResults, setShowResults] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
 
-  const availableSubjects = testType ? testSubjects[testType] || [] : [];
-  const availableTopics = subject ? specificTopics[subject] || [] : [];
+  const availableSubjects = testType ? TEST_SUBJECTS[testType] || [] : [];
+  const availableTopics = subject ? TOPIC_OPTIONS[subject] || [] : [];
 
   const generateQuestions = async () => {
     if (!testType || !subject) return;
 
     setIsGenerating(true);
     try {
-      const response = await fetch("/api/generate-questions", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+      const response = await fetch('/api/generate-questions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           testType,
           subject,
           topic: topic || "General",
-          numQuestions: parseInt(numQuestions),
-        }),
+          numQuestions: parseInt(numQuestions)
+        })
       });
 
       if (response.ok) {
@@ -116,16 +67,16 @@ export default function Practice() {
         setShowResults(false);
       }
     } catch (error) {
-      console.error("Error generating questions:", error);
+      console.error('Error generating questions:', error);
     }
     setIsGenerating(false);
   };
 
-  const selectAnswer = (questionIndex: number, answerIndex: number) => {
+  const selectAnswer = (questionIndex, answerIndex) => {
     if (showResults) return;
-    setSelectedAnswers((prev) => ({
+    setSelectedAnswers(prev => ({
       ...prev,
-      [questionIndex]: answerIndex,
+      [questionIndex]: answerIndex
     }));
   };
 
@@ -152,8 +103,7 @@ export default function Practice() {
 
   const suggestTopics = () => {
     if (subject && availableTopics.length > 0) {
-      const randomTopic =
-        availableTopics[Math.floor(Math.random() * availableTopics.length)];
+      const randomTopic = availableTopics[Math.floor(Math.random() * availableTopics.length)];
       setTopic(randomTopic);
     }
   };
@@ -167,24 +117,19 @@ export default function Practice() {
             <div className="w-16 h-16 bg-emerald-100 dark:bg-emerald-400/10 rounded-full flex items-center justify-center mx-auto mb-4">
               <BookOpen className="w-8 h-8 text-emerald-600 dark:text-emerald-400" />
             </div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-              AI Practice Questions
-            </h1>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">AI Practice Questions</h1>
             <p className="text-gray-600 dark:text-white/70">
-              Get personalized practice questions generated by AI for your
-              specific test and subject
+              Get personalized practice questions generated by AI for your specific test and subject
             </p>
           </div>
 
           {questions.length === 0 ? (
             <div>
               <ApiKeyNotice />
-              {/* Question Generation Form */}
+              
               <Card className="bg-white dark:bg-black border dark:border-white/20">
                 <CardHeader>
-                  <CardTitle className="text-gray-900 dark:text-white">
-                    Choose Your Test
-                  </CardTitle>
+                  <CardTitle className="text-gray-900 dark:text-white">Choose Your Test</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -210,19 +155,13 @@ export default function Practice() {
                       <label className="block text-sm font-medium text-gray-700 dark:text-white mb-2">
                         Subject
                       </label>
-                      <Select
-                        value={subject}
-                        onValueChange={setSubject}
-                        disabled={!testType}
-                      >
+                      <Select value={subject} onValueChange={setSubject} disabled={!testType}>
                         <SelectTrigger className="dark:bg-black dark:border-white/50 dark:text-white">
                           <SelectValue placeholder="Select subject" />
                         </SelectTrigger>
                         <SelectContent className="dark:bg-black dark:border-white/50">
                           {availableSubjects.map((subj) => (
-                            <SelectItem key={subj} value={subj}>
-                              {subj}
-                            </SelectItem>
+                            <SelectItem key={subj} value={subj}>{subj}</SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
@@ -233,10 +172,7 @@ export default function Practice() {
                       <label className="block text-sm font-medium text-gray-700 dark:text-white mb-2">
                         Number of Questions
                       </label>
-                      <Select
-                        value={numQuestions}
-                        onValueChange={setNumQuestions}
-                      >
+                      <Select value={numQuestions} onValueChange={setNumQuestions}>
                         <SelectTrigger className="dark:bg-black dark:border-white/50 dark:text-white">
                           <SelectValue />
                         </SelectTrigger>
@@ -250,7 +186,7 @@ export default function Practice() {
                     </div>
                   </div>
 
-                  {/* Specific Topics */}
+                  {/* Topic Selection */}
                   {availableTopics.length > 0 && (
                     <div>
                       <div className="flex items-center justify-between mb-2">
@@ -271,17 +207,13 @@ export default function Practice() {
                         {availableTopics.map((topicOption) => (
                           <Badge
                             key={topicOption}
-                            variant={
-                              topic === topicOption ? "default" : "outline"
-                            }
+                            variant={topic === topicOption ? "default" : "outline"}
                             className={`cursor-pointer transition-colors ${
                               topic === topicOption
-                                ? "bg-emerald-600 dark:bg-emerald-400 text-white dark:text-black"
-                                : "hover:bg-emerald-50 dark:hover:bg-emerald-400/10 dark:text-white dark:border-white/50"
+                                ? 'bg-emerald-600 dark:bg-emerald-400 text-white dark:text-black'
+                                : 'hover:bg-emerald-50 dark:hover:bg-emerald-400/10 dark:text-white dark:border-white/50'
                             }`}
-                            onClick={() =>
-                              setTopic(topic === topicOption ? "" : topicOption)
-                            }
+                            onClick={() => setTopic(topic === topicOption ? "" : topicOption)}
                           >
                             {topicOption}
                           </Badge>
@@ -295,15 +227,13 @@ export default function Practice() {
                     disabled={!testType || !subject || isGenerating}
                     className="w-full bg-emerald-600 dark:bg-emerald-400 hover:bg-emerald-700 dark:hover:bg-emerald-500 text-white dark:text-black"
                   >
-                    {isGenerating
-                      ? "Generating Questions..."
-                      : "Generate 5 Practice Questions"}
+                    {isGenerating ? "Generating Questions..." : "Generate Practice Questions"}
                   </Button>
                 </CardContent>
               </Card>
             </div>
           ) : (
-            /* Questions Display */
+            /* Quiz Interface */
             <div className="space-y-6">
               {/* Progress */}
               <div className="flex items-center justify-between">
@@ -321,10 +251,7 @@ export default function Practice() {
                   <CardHeader>
                     <CardTitle className="text-gray-900 dark:text-white">
                       Question {currentQuestion + 1}
-                      <Badge
-                        variant="outline"
-                        className="ml-2 dark:border-white/50 dark:text-white"
-                      >
+                      <Badge variant="outline" className="ml-2 dark:border-white/50 dark:text-white">
                         {questions[currentQuestion]?.difficulty || "Medium"}
                       </Badge>
                     </CardTitle>
@@ -335,36 +262,30 @@ export default function Practice() {
                     </p>
 
                     <div className="space-y-3">
-                      {questions[currentQuestion]?.choices.map(
-                        (choice, index) => (
-                          <button
-                            key={index}
-                            onClick={() => selectAnswer(currentQuestion, index)}
-                            className={`w-full p-4 text-left border-2 rounded-lg transition-all ${
-                              selectedAnswers[currentQuestion] === index
-                                ? "border-emerald-500 bg-emerald-50 dark:bg-emerald-400/10 dark:border-emerald-400"
-                                : "border-gray-200 dark:border-white/20 hover:border-gray-300 dark:hover:border-white/70"
-                            }`}
-                          >
-                            <div className="flex items-center">
-                              <span className="w-8 h-8 rounded-full border-2 border-current flex items-center justify-center mr-3 text-sm font-semibold">
-                                {String.fromCharCode(65 + index)}
-                              </span>
-                              <span className="text-gray-900 dark:text-white">
-                                {choice}
-                              </span>
-                            </div>
-                          </button>
-                        ),
-                      )}
+                      {questions[currentQuestion]?.choices.map((choice, index) => (
+                        <button
+                          key={index}
+                          onClick={() => selectAnswer(currentQuestion, index)}
+                          className={`w-full p-4 text-left border-2 rounded-lg transition-all ${
+                            selectedAnswers[currentQuestion] === index
+                              ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-400/10 dark:border-emerald-400'
+                              : 'border-gray-200 dark:border-white/20 hover:border-gray-300 dark:hover:border-white/70'
+                          }`}
+                        >
+                          <div className="flex items-center">
+                            <span className="w-8 h-8 rounded-full border-2 border-current flex items-center justify-center mr-3 text-sm font-semibold">
+                              {String.fromCharCode(65 + index)}
+                            </span>
+                            <span className="text-gray-900 dark:text-white">{choice}</span>
+                          </div>
+                        </button>
+                      ))}
                     </div>
 
                     <div className="flex justify-between mt-8">
                       <Button
                         variant="outline"
-                        onClick={() =>
-                          setCurrentQuestion(Math.max(0, currentQuestion - 1))
-                        }
+                        onClick={() => setCurrentQuestion(Math.max(0, currentQuestion - 1))}
                         disabled={currentQuestion === 0}
                         className="dark:bg-black dark:border-white/50 dark:text-white"
                       >
@@ -374,24 +295,14 @@ export default function Practice() {
                       {currentQuestion === questions.length - 1 ? (
                         <Button
                           onClick={submitAnswers}
-                          disabled={
-                            Object.keys(selectedAnswers).length !==
-                            questions.length
-                          }
+                          disabled={Object.keys(selectedAnswers).length !== questions.length}
                           className="bg-emerald-600 dark:bg-emerald-400 hover:bg-emerald-700 dark:hover:bg-emerald-500 text-white dark:text-black"
                         >
                           Submit Answers
                         </Button>
                       ) : (
                         <Button
-                          onClick={() =>
-                            setCurrentQuestion(
-                              Math.min(
-                                questions.length - 1,
-                                currentQuestion + 1,
-                              ),
-                            )
-                          }
+                          onClick={() => setCurrentQuestion(Math.min(questions.length - 1, currentQuestion + 1))}
                           className="bg-emerald-600 dark:bg-emerald-400 hover:bg-emerald-700 dark:hover:bg-emerald-500 text-white dark:text-black"
                         >
                           Next
@@ -412,26 +323,18 @@ export default function Practice() {
                   </Card>
 
                   {questions.map((question, qIndex) => (
-                    <Card
-                      key={qIndex}
-                      className="bg-white dark:bg-black border dark:border-white/20"
-                    >
+                    <Card key={qIndex} className="bg-white dark:bg-black border dark:border-white/20">
                       <CardContent className="p-6">
                         <div className="flex items-start justify-between mb-4">
-                          <h3 className="font-semibold text-gray-900 dark:text-white">
-                            Question {qIndex + 1}
-                          </h3>
-                          {selectedAnswers[qIndex] ===
-                          question.correct_answer ? (
+                          <h3 className="font-semibold text-gray-900 dark:text-white">Question {qIndex + 1}</h3>
+                          {selectedAnswers[qIndex] === question.correct_answer ? (
                             <CheckCircle className="w-6 h-6 text-green-500" />
                           ) : (
                             <XCircle className="w-6 h-6 text-red-500" />
                           )}
                         </div>
 
-                        <p className="text-gray-900 dark:text-white mb-4">
-                          {question.question}
-                        </p>
+                        <p className="text-gray-900 dark:text-white mb-4">{question.question}</p>
 
                         <div className="space-y-2 mb-4">
                           {question.choices.map((choice, cIndex) => (
@@ -439,29 +342,23 @@ export default function Practice() {
                               key={cIndex}
                               className={`p-3 rounded-lg border ${
                                 cIndex === question.correct_answer
-                                  ? "border-green-500 bg-green-50 dark:bg-green-500/10"
+                                  ? 'border-green-500 bg-green-50 dark:bg-green-500/10'
                                   : selectedAnswers[qIndex] === cIndex
-                                    ? "border-red-500 bg-red-50 dark:bg-red-500/10"
-                                    : "border-gray-200 dark:border-white/20"
+                                  ? 'border-red-500 bg-red-50 dark:bg-red-500/10'
+                                  : 'border-gray-200 dark:border-white/20'
                               }`}
                             >
                               <span className="font-medium">
                                 {String.fromCharCode(65 + cIndex)}.
                               </span>
-                              <span className="ml-2 text-gray-900 dark:text-white">
-                                {choice}
-                              </span>
+                              <span className="ml-2 text-gray-900 dark:text-white">{choice}</span>
                             </div>
                           ))}
                         </div>
 
                         <div className="bg-blue-50 dark:bg-white/10 p-4 rounded-lg border dark:border-white/30">
-                          <h4 className="font-semibold text-blue-900 dark:text-white mb-2">
-                            Explanation:
-                          </h4>
-                          <p className="text-blue-800 dark:text-white/80">
-                            {question.explanation}
-                          </p>
+                          <h4 className="font-semibold text-blue-900 dark:text-white mb-2">Explanation:</h4>
+                          <p className="text-blue-800 dark:text-white/80">{question.explanation}</p>
                         </div>
                       </CardContent>
                     </Card>
