@@ -1,27 +1,22 @@
 import "dotenv/config";
 import express from "express";
 import cors from "cors";
-import { handleDemo } from "./routes/demo";
 import { handleGenerateQuestions } from "./routes/questions";
 import { handleChat } from "./routes/chat";
 
 export function createServer() {
   const app = express();
 
-  // Middleware
+  // Basic middleware
   app.use(cors());
   app.use(express.json());
-  app.use(express.urlencoded({ extended: true }));
 
-  // Example API routes
-  app.get("/api/ping", (_req, res) => {
-    const ping = process.env.PING_MESSAGE ?? "ping";
-    res.json({ message: ping });
+  // Health check
+  app.get("/api/ping", (req, res) => {
+    res.json({ message: "PrepMind API is running" });
   });
 
-  app.get("/api/demo", handleDemo);
-
-  // PrepMind API routes
+  // Main API routes
   app.post("/api/generate-questions", handleGenerateQuestions);
   app.post("/api/chat", handleChat);
 
