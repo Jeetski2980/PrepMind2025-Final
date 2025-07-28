@@ -52,7 +52,7 @@ export default function About() {
                 </h3>
                 <p className="text-gray-600 dark:text-white/70">
                   Our platform leverages Together AI's advanced language models
-                  to generate unlimited, unique practice questions across
+                  to generate unique practice questions across
                   different subjects. This ensures highly relevant,
                   cost-effective content for your prep.
                 </p>
