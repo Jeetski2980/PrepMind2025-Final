@@ -86,6 +86,7 @@ Provide a helpful response with:
 - Practical study tips
 - Encouraging tone
 - Focus on test preparation
+- If solving a problem, bold the final answer using **bold text**
 
 Keep it 2-3 paragraphs.`;
 
