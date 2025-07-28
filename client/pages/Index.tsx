@@ -51,7 +51,7 @@ export default function Index() {
             {/* Mission statement */}
             <p className="text-lg text-gray-700 dark:text-white/80 mb-12 max-w-4xl mx-auto">
               PrepMind provides free, high-quality SAT, ACT, and AP practice to
-              help underprivileged students gain equal access to powerful study
+              help students gain equal access to powerful study
               tools—so they have the same opportunities to succeed as anyone
               else.
             </p>
