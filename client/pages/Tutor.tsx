@@ -14,6 +14,8 @@ import {
 } from "lucide-react";
 import Layout from "@/components/Layout";
 import ApiKeyNotice from "@/components/ApiKeyNotice";
+import 'katex/dist/katex.min.css';
+import { InlineMath, BlockMath } from 'react-katex';
 
 interface Message {
   id: number;
@@ -174,6 +176,61 @@ export default function Tutor() {
     }
   };
 
+  const renderMessageContent = (text: string) => {
+    // Split text by highlight markers for explanation highlighting
+    const parts = text.split(/(<highlight>.*?<\/highlight>)/g);
+
+    return parts.map((part, index) => {
+      // Handle highlighted explanations
+      if (part.startsWith('<highlight>') && part.endsWith('</highlight>')) {
+        const content = part.slice(11, -12); // Remove <highlight> tags
+        return (
+          <span key={index} className="bg-yellow-200 dark:bg-yellow-600/30 px-1 py-0.5 rounded">
+            {renderTextWithMath(content)}
+          </span>
+        );
+      }
+
+      return <span key={index}>{renderTextWithMath(part)}</span>;
+    });
+  };
+
+  const renderTextWithMath = (text: string) => {
+    // Handle inline math expressions (single $) and display math (double $$)
+    const mathRegex = /(\$\$[^$]+\$\$|\$[^$]+\$)/g;
+    const parts = text.split(mathRegex);
+
+    return parts.map((part, index) => {
+      if (part.startsWith('$$') && part.endsWith('$$')) {
+        // Display math (block)
+        const mathContent = part.slice(2, -2);
+        try {
+          return <BlockMath key={index} math={mathContent} />;
+        } catch (error) {
+          return <span key={index}>{part}</span>;
+        }
+      } else if (part.startsWith('$') && part.endsWith('$')) {
+        // Inline math
+        const mathContent = part.slice(1, -1);
+        try {
+          return <InlineMath key={index} math={mathContent} />;
+        } catch (error) {
+          return <span key={index}>{part}</span>;
+        }
+      } else {
+        // Regular text with bold formatting
+        return (
+          <span
+            key={index}
+            dangerouslySetInnerHTML={{
+              __html: part.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+            }}
+          />
+        );
+      }
+    });
+  };
+
   return (
     <Layout>
       <div className="min-h-screen bg-gray-50 dark:bg-black py-8">
@@ -230,12 +287,9 @@ export default function Tutor() {
                           : "bg-white dark:bg-black border dark:border-white/30 text-gray-900 dark:text-white rounded-bl-md"
                       }`}
                     >
-                      <p
-                        className="whitespace-pre-wrap"
-                        dangerouslySetInnerHTML={{
-                          __html: message.text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                        }}
-                      />
+                      <div className="whitespace-pre-wrap">
+                        {renderMessageContent(message.text)}
+                      </div>
                       {!message.isUser && (
                         <Button
                           variant="ghost"
