@@ -23,10 +23,22 @@ const TOPIC_OPTIONS = {
   "Writing": ["Grammar", "Sentence Structure", "Essay Writing", "Rhetorical Analysis"],
   "English": ["Grammar", "Punctuation", "Style", "Strategy"],
   "Science": ["Data Analysis", "Scientific Reasoning", "Research Summaries"],
+  // AP Exams
   "Calculus AB": ["Limits", "Derivatives", "Integrals", "Applications"],
+  "Calculus BC": ["Series", "Parametric Equations", "Polar Coordinates", "Advanced Integration"],
+  "Statistics": ["Probability", "Sampling", "Inference", "Regression"],
   "Physics 1": ["Kinematics", "Forces", "Energy", "Waves"],
+  "Physics 2": ["Fluid Mechanics", "Thermodynamics", "Electrostatics", "Magnetism"],
+  "Physics C": ["Mechanics", "Electricity & Magnetism", "Advanced Calculus"],
   "Chemistry": ["Atomic Structure", "Chemical Bonding", "Reactions", "Thermodynamics"],
-  "Biology": ["Cell Biology", "Genetics", "Evolution", "Ecology"]
+  "Biology": ["Cell Biology", "Genetics", "Evolution", "Ecology"],
+  "English Language": ["Rhetorical Analysis", "Synthesis", "Argument Writing", "Language Use"],
+  "English Literature": ["Poetry Analysis", "Prose Analysis", "Literary Devices", "Thematic Analysis"],
+  "US History": ["Colonial Period", "Revolutionary Era", "Civil War", "Modern America"],
+  "World History": ["Ancient Civilizations", "Medieval Period", "Renaissance", "Modern World"],
+  "Government": ["Constitutional Principles", "Political Institutions", "Civil Rights", "Public Policy"],
+  "Psychology": ["Biological Bases", "Sensation & Perception", "Learning", "Cognition"],
+  "Computer Science A": ["Object-Oriented Programming", "Data Structures", "Algorithms", "Program Design"]
 };
 
 export default function Practice() {
