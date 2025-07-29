@@ -81,14 +81,15 @@ export async function generateChatResponse(message) {
 
 Student question: "${message}"
 
-Provide a helpful response with:
-- Clear explanations
-- Practical study tips
-- Encouraging tone
-- Focus on test preparation
-- If solving a problem, bold the final answer using **bold text**
+Provide a helpful response following these formatting rules:
+- Use **bold text** for final answers and important formulas
+- Use $inline math$ for mathematical expressions (e.g., $x = 5$, $\\frac{a}{b}$)
+- Use $$display math$$ for longer equations (e.g., $$\\int_0^1 x^2 dx$$)
+- Wrap 1-2 sentence explanations/summaries with <highlight>explanation here</highlight>
+- Clear explanations with practical study tips
+- Encouraging tone focused on test preparation
 
-Keep it 2-3 paragraphs.`;
+Keep responses 2-3 paragraphs with proper math formatting.`;
 
   try {
     const completion = await together.chat.completions.create({
