@@ -25,10 +25,10 @@ export default function Index() {
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
           <div className="text-center">
-            {/* Powered by AI badge */}
+            {/* Powered by Advanced AI badge */}
             <div className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-emerald-100 dark:bg-emerald-400/10 text-emerald-700 dark:text-emerald-400 mb-8">
               <Lightbulb className="w-4 h-4 mr-2" />
-              Powered by AI
+              Powered by Advanced AI
             </div>
 
             {/* Main headline */}
@@ -36,20 +36,24 @@ export default function Index() {
               <span className="text-gray-900 dark:text-white">Prep </span>
               <span className="text-emerald-600 dark:text-emerald-400">Smarter.</span>
               <br />
-              <span className="text-gray-600 dark:text-white/80">Not Harder.</span>
+              <span className="text-emerald-600 dark:text-emerald-400">Not Harder.</span>
             </h1>
 
             <p className="max-w-3xl mx-auto text-xl text-gray-600 dark:text-white/70 leading-relaxed mb-10">
-              Master SAT, ACT, and AP exams with our AI-powered platform. Get personalized practice questions,
-              instant explanations, and adaptive learning that helps you achieve your target score.
+              Free AI-powered practice questions and personalized tutoring for SAT, ACT, and AP
+              exams. Just smarter studying.
+            </p>
+
+            <p className="max-w-3xl mx-auto text-lg text-gray-600 dark:text-white/70 leading-relaxed mb-10">
+              PrepMind provides free, high-quality SAT, ACT, and AP practice to help students gain equal access to powerful
+              study tools—so they have the same opportunities to succeed as anyone else.
             </p>
 
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
               <Link to="/practice">
                 <Button className="text-lg px-8 py-4 bg-emerald-600 dark:bg-emerald-400 hover:bg-emerald-700 dark:hover:bg-emerald-500 text-white dark:text-black">
-                  <BookOpen className="w-5 h-5 mr-2" />
-                  Start Practice
+                  Start Practicing →
                 </Button>
               </Link>
               <Link to="/tutor">
@@ -57,26 +61,9 @@ export default function Index() {
                   variant="outline"
                   className="text-lg px-8 py-4 border-2 dark:border-white/30 dark:text-white dark:hover:bg-white dark:hover:text-black"
                 >
-                  <MessageSquare className="w-5 h-5 mr-2" />
-                  AI Tutor Chat
+                  Meet Your AI Tutor
                 </Button>
               </Link>
-            </div>
-
-            {/* Stats */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
-              <div className="text-center">
-                <div className="text-4xl font-bold text-emerald-600 dark:text-emerald-400 mb-2">10K+</div>
-                <div className="text-gray-600 dark:text-white/70">Practice Questions</div>
-              </div>
-              <div className="text-center">
-                <div className="text-4xl font-bold text-emerald-600 dark:text-emerald-400 mb-2">95%</div>
-                <div className="text-gray-600 dark:text-white/70">Student Satisfaction</div>
-              </div>
-              <div className="text-center">
-                <div className="text-4xl font-bold text-emerald-600 dark:text-emerald-400 mb-2">24/7</div>
-                <div className="text-gray-600 dark:text-white/70">AI Tutor Available</div>
-              </div>
             </div>
           </div>
         </div>
