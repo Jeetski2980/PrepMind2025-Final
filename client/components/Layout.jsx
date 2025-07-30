@@ -131,7 +131,7 @@ export default function Layout({ children }) {
             </div>
 
             {/* Quick Links */}
-            <div>
+         <div>
   <h3 className="font-semibold text-gray-900 dark:text-white mb-4">Quick Links</h3>
   <ul className="space-y-2">
     <li>
@@ -150,12 +150,21 @@ export default function Layout({ children }) {
       </Link>
     </li>
     <li>
-      <a href="mailto:support@prepmind.org" className="text-gray-600 dark:text-white/70 hover:text-emerald-600 dark:hover:text-emerald-400">
-        Contact Us
-      </a>
+      <span className="text-gray-600 dark:text-white/70">
+        Contact Us:{' '}
+        <a
+          href="https://mail.google.com/mail/?view=cm&fs=1&to=support@prepmind.org"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="hover:text-emerald-600 dark:hover:text-emerald-400 underline"
+        >
+          support@prepmind.org
+        </a>
+      </span>
     </li>
   </ul>
 </div>
+
 
             {/* Support */}
             <div>
