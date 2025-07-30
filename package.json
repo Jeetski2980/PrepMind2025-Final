@@ -8,9 +8,8 @@
     "dev": "vite",
     "build": "npm run build:client && npm run build:server",
     "build:client": "vite build",
-    "build:server": "vite build --config vite.config.server.ts",
-    "start": "node dist/server/node-build.mjs",
-    "typecheck": "tsc"
+    "build:server": "vite build --config vite.config.server.js",
+    "start": "node dist/server/node-build.mjs"
   },
   "dependencies": {
     "dotenv": "^17.2.0",
