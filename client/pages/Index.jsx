@@ -77,46 +77,46 @@ export default function Index() {
               Everything You Need to Succeed
             </h2>
             <p className="text-xl text-gray-600 dark:text-white/70 max-w-3xl mx-auto">
-              Our comprehensive platform combines cutting-edge AI with proven test prep strategies to maximize your potential.
+              Advanced AI technology meets personalized learning to give you the edge you need
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {/* Feature 1 */}
             <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow dark:bg-black dark:border dark:border-white/20">
-              <CardContent className="p-8">
-                <div className="w-12 h-12 bg-emerald-100 dark:bg-emerald-400/10 rounded-lg flex items-center justify-center mb-6">
-                  <Brain className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
+              <CardContent className="p-8 text-center">
+                <div className="w-16 h-16 bg-emerald-100 dark:bg-emerald-400/10 rounded-lg flex items-center justify-center mx-auto mb-6">
+                  <Brain className="w-8 h-8 text-emerald-600 dark:text-emerald-400" />
                 </div>
-                <h3 className="text-2xl font-semibold text-gray-900 dark:text-white mb-4">AI-Powered Questions</h3>
+                <h3 className="text-2xl font-semibold text-gray-900 dark:text-white mb-4">AI-Generated Questions</h3>
                 <p className="text-gray-600 dark:text-white/70 leading-relaxed">
-                  Get unlimited practice questions tailored to your skill level and learning gaps, with instant feedback and explanations.
+                  Get unlimited practice questions tailored to your skill level and difficulty level. Our AI creates fresh content that mirrors real exam patterns.
                 </p>
               </CardContent>
             </Card>
 
             {/* Feature 2 */}
             <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow dark:bg-black dark:border dark:border-white/20">
-              <CardContent className="p-8">
-                <div className="w-12 h-12 bg-emerald-100 dark:bg-emerald-400/10 rounded-lg flex items-center justify-center mb-6">
-                  <MessageSquare className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
+              <CardContent className="p-8 text-center">
+                <div className="w-16 h-16 bg-emerald-100 dark:bg-emerald-400/10 rounded-lg flex items-center justify-center mx-auto mb-6">
+                  <BookOpen className="w-8 h-8 text-emerald-600 dark:text-emerald-400" />
                 </div>
-                <h3 className="text-2xl font-semibold text-gray-900 dark:text-white mb-4">24/7 AI Tutor</h3>
+                <h3 className="text-2xl font-semibold text-gray-900 dark:text-white mb-4">Instant Explanations</h3>
                 <p className="text-gray-600 dark:text-white/70 leading-relaxed">
-                  Chat with our AI tutor anytime for explanations, study tips, and personalized guidance on any topic.
+                  Never wonder why an answer is correct. Get detailed, step-by-step explanations that help you understand the concepts.
                 </p>
               </CardContent>
             </Card>
 
             {/* Feature 3 */}
             <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow dark:bg-black dark:border dark:border-white/20">
-              <CardContent className="p-8">
-                <div className="w-12 h-12 bg-emerald-100 dark:bg-emerald-400/10 rounded-lg flex items-center justify-center mb-6">
-                  <Award className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
+              <CardContent className="p-8 text-center">
+                <div className="w-16 h-16 bg-emerald-100 dark:bg-emerald-400/10 rounded-lg flex items-center justify-center mx-auto mb-6">
+                  <MessageSquare className="w-8 h-8 text-emerald-600 dark:text-emerald-400" />
                 </div>
-                <h3 className="text-2xl font-semibold text-gray-900 dark:text-white mb-4">Proven Results</h3>
+                <h3 className="text-2xl font-semibold text-gray-900 dark:text-white mb-4">Personal AI Tutor</h3>
                 <p className="text-gray-600 dark:text-white/70 leading-relaxed">
-                  Join thousands of students who've improved their scores using our adaptive learning technology.
+                  Ask questions anytime, anywhere. Our AI tutor provides personalized help with concepts, strategies, and test-taking techniques.
                 </p>
               </CardContent>
             </Card>
