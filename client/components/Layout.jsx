@@ -132,25 +132,30 @@ export default function Layout({ children }) {
 
             {/* Quick Links */}
             <div>
-              <h3 className="font-semibold text-gray-900 dark:text-white mb-4">Quick Links</h3>
-              <ul className="space-y-2">
-                <li>
-                  <Link to="/practice" className="text-gray-600 dark:text-white/70 hover:text-emerald-600 dark:hover:text-emerald-400">
-                    Practice Questions
-                  </Link>
-                </li>
-                <li>
-                  <Link to="/tutor" className="text-gray-600 dark:text-white/70 hover:text-emerald-600 dark:hover:text-emerald-400">
-                    AI Tutor
-                  </Link>
-                </li>
-                <li>
-                  <Link to="/about" className="text-gray-600 dark:text-white/70 hover:text-emerald-600 dark:hover:text-emerald-400">
-                    About Us
-                  </Link>
-                </li>
-              </ul>
-            </div>
+  <h3 className="font-semibold text-gray-900 dark:text-white mb-4">Quick Links</h3>
+  <ul className="space-y-2">
+    <li>
+      <Link to="/practice" className="text-gray-600 dark:text-white/70 hover:text-emerald-600 dark:hover:text-emerald-400">
+        Practice Questions
+      </Link>
+    </li>
+    <li>
+      <Link to="/tutor" className="text-gray-600 dark:text-white/70 hover:text-emerald-600 dark:hover:text-emerald-400">
+        AI Tutor
+      </Link>
+    </li>
+    <li>
+      <Link to="/about" className="text-gray-600 dark:text-white/70 hover:text-emerald-600 dark:hover:text-emerald-400">
+        About Us
+      </Link>
+    </li>
+    <li>
+      <a href="mailto:support@prepmind.org" className="text-gray-600 dark:text-white/70 hover:text-emerald-600 dark:hover:text-emerald-400">
+        Contact Us
+      </a>
+    </li>
+  </ul>
+</div>
 
             {/* Support */}
             <div>
