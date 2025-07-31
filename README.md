@@ -17,7 +17,7 @@ The platform is designed to be completely free and accessible to all students, e
 PrepMind is a full-stack web application built with:
 
 **Frontend:**
-- React 18 with TypeScript
+- React 18 with JavaScript
 - React Router for navigation
 - Tailwind CSS for styling
 - Radix UI components for accessible UI elements
@@ -31,7 +31,7 @@ PrepMind is a full-stack web application built with:
 **Development:**
 - Vite for fast development and building
 - Hot reload for both frontend and backend
-- TypeScript throughout for type safety
+- Modern JavaScript throughout for clean, readable code
 
 ### File Structure
 ```
