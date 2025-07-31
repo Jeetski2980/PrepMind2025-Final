@@ -46,7 +46,7 @@ PrepMind is a full-stack web application built with:
 │   │   ├── Tutor.jsx      # AI chat tutor
 │   │   ├── About.jsx      # About page
 │   │   └── NotFound.jsx   # 404 page
-│   ��── App.jsx            # Main app with routing
+│   └── App.jsx            # Main app with routing
 ├── server/                # Express backend
 │   ├── routes/            # API endpoints
 │   │   ├── questions.js   # Question generation
@@ -182,7 +182,7 @@ The code is written to be readable and maintainable:
 - Simple, clear function names
 - Minimal abstraction where possible
 - Consistent formatting and structure
-- TypeScript for type safety
+- Modern JavaScript for clean, readable code
 
 ### Error Handling
 - Graceful degradation when AI services fail
