@@ -38,24 +38,22 @@ PrepMind is a full-stack web application built with:
 ├── client/                 # React frontend
 │   ├── components/         # Reusable components
 │   │   ├── ui/            # UI component library
-│   │   ├── Layout.tsx     # Main layout with header/footer
-│   │   └── ApiKeyNotice.tsx # AI status indicator
+│   │   ├── Layout.jsx     # Main layout with header/footer
+│   │   └── ApiKeyNotice.jsx # AI status indicator
 │   ├── pages/             # Page components
-│   │   ├── Index.tsx      # Homepage
-│   │   ├── Practice.tsx   # Practice questions
-│   │   ├── Tutor.tsx      # AI chat tutor
-│   │   ├── About.tsx      # About page
-│   │   └── NotFound.tsx   # 404 page
-│   └── App.tsx            # Main app with routing
+│   │   ├── Index.jsx      # Homepage
+│   │   ├── Practice.jsx   # Practice questions
+│   │   ├── Tutor.jsx      # AI chat tutor
+│   │   ├── About.jsx      # About page
+│   │   └── NotFound.jsx   # 404 page
+│   ��── App.jsx            # Main app with routing
 ├── server/                # Express backend
 │   ├── routes/            # API endpoints
-│   │   ├── questions.ts   # Question generation
-│   │   └── chat.ts        # Chat responses
+│   │   ├── questions.js   # Question generation
+│   │   └── chat.js        # Chat responses
 │   ├── services/          # Business logic
-│   │   └── together.ts    # Together AI integration
-│   └── index.ts           # Server setup
-├── shared/                # Shared types
-│   └── api.ts             # TypeScript interfaces
+│   │   └── together.js    # Together AI integration
+│   └── index.js           # Server setup
 └── public/                # Static assets
     ├── favicon.svg        # Site icon
     └── robots.txt         # SEO directives
