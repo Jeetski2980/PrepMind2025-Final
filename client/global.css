@@ -5,10 +5,9 @@
 
 @layer base {
   /**
-   * Tailwind CSS theme
-   * tailwind.config.ts expects the following color variables to be expressed as HSL values.
-   * A different format will require also updating the theme in tailwind.config.ts.
-  */
+   * CSS Variables for Tailwind Theme (HSL Format)
+   * Syncs with tailwind.config.js
+   */
   :root {
     --background: 0 0% 100%;
     --foreground: 222.2 84% 4.9%;
@@ -78,16 +77,21 @@
   }
 
   body {
-    @apply bg-background text-foreground transition-colors duration-300;
+    @apply bg-background text-foreground transition-colors duration-300 antialiased;
   }
 
-  /* Enhanced dark mode overrides */
+  /* Optional: Smooth dark override for layout shell */
   .dark body {
     background-color: #000000 !important;
     color: #ffffff !important;
   }
 
-  /* Ensure all cards and components get proper dark styling */
+  /* Optional: Add scroll behavior */
+  html {
+    scroll-behavior: smooth;
+  }
+
+  /* Radix Select Component Dark Fixes */
   .dark [data-radix-select-content] {
     background-color: #000000 !important;
     border-color: rgba(255, 255, 255, 0.2) !important;
