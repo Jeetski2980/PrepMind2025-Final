@@ -149,41 +149,40 @@ export default function About() {
           </Card>
 
           {/* Technical Specifications Section */}
-          <Card className="bg-card text-card-foreground shadow-card hover:shadow-hover transition-shadow duration-300 rounded-2xl">
-      <CardContent className="p-8">
-        <div className="text-center mb-8">
-          <h2 className="text-heading-2 font-bold mb-2">Technical Specifications</h2>
-          <p className="text-muted-foreground">Technology stack powering PrepMind</p>
-        </div>
+      <Card className="bg-white text-gray-800 dark:bg-gray-900 dark:text-white shadow-md">
+            <CardContent className="p-8">
+              <div className="text-center mb-8">
+                <h2 className="text-2xl font-bold mb-4">Technical Specifications</h2>
+                <p className="text-gray-500 dark:text-gray-400">
+                  Learn about the technology stack powering PrepMind.
+                </p>
+              </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 text-sm">
-          <div className="transition hover:scale-102">
-            <h3 className="font-semibold text-lg flex items-center gap-2 mb-2">
-              <Cpu className="w-5 h-5 text-primary" />
-              Frontend Technology
-            </h3>
-            <ul className="list-disc list-inside space-y-1 text-muted-foreground">
-              <li>React.js (interactive UI)</li>
-              <li>Tailwind CSS (utility-first styling)</li>
-              <li>JavaScript (ES6+)</li>
-              <li>Responsive + Component-based</li>
-            </ul>
-          </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-sm">
+                <div>
+                  <h3 className="font-semibold text-lg mb-2">Frontend Technology</h3>
+                  <ul className="list-disc list-inside space-y-1">
+                    <li>React.js for dynamic interface</li>
+                    <li>Tailwind CSS for utility-first design</li>
+                    <li>JavaScript (ES6+)</li>
+                    <li>Component-based architecture</li>
+                  </ul>
+                </div>
+                <div>
+                  <h3 className="font-semibold text-lg mb-2">Backend & AI</h3>
+                  <ul className="list-disc list-inside space-y-1">
+                    <li>Node.js backend infrastructure</li>
+                    <li>RESTful API design</li>
+                    <li>Together AI language model integration</li>
+                    <li>Real-time response generation</li>
+                  </ul>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
 
-          <div className="transition hover:scale-102">
-            <h3 className="font-semibold text-lg flex items-center gap-2 mb-2">
-              <Server className="w-5 h-5 text-primary" />
-              Backend & AI
-            </h3>
-            <ul className="list-disc list-inside space-y-1 text-muted-foreground">
-              <li>Node.js infrastructure</li>
-              <li>RESTful APIs</li>
-              <li>Together AI integration</li>
-              <li>Real-time AI response engine</li>
-            </ul>
-          </div>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </Layout>
   );
 }
