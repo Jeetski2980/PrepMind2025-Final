@@ -73,18 +73,17 @@ export default function About() {
               </CardContent>
             </Card>
 
-            {/* Always Free */}
+            {/*Platform &Security*/}
             <Card className="bg-white dark:bg-black border dark:border-white/20">
               <CardContent className="p-6">
                 <div className="w-12 h-12 bg-emerald-100 dark:bg-emerald-400/10 rounded-lg flex items-center justify-center mb-4">
                   <Shield className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
                 </div>
                 <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">
-                  Always Free
+                  Platform &Security
                 </h3>
                 <p className="text-gray-600 dark:text-white/70">
-                  No hidden fees, no premium tiers, no limitations. PrepMind is committed to 
-                  providing world-class test prep to every student, regardless of financial background.
+                  The platform is hosted on sercure cloud infrastucture with proper SSL certificates and is developed to ensure reliability and safety. 
                 </p>
               </CardContent>
             </Card>
@@ -149,38 +148,39 @@ export default function About() {
             </CardContent>
           </Card>
 
-          {/* Stats Section */}
-          <Card className="bg-gradient-to-r from-emerald-600 to-green-600 dark:from-emerald-400 dark:to-green-500 text-white dark:text-black">
+          {/* Technical Specifications Section */}
+          <Card className="bg-white text-gray-800 dark:bg-gray-900 dark:text-white shadow-md">
             <CardContent className="p-8">
               <div className="text-center mb-8">
-                <h2 className="text-2xl font-bold mb-4">
-                  Trusted by Students Everywhere
-                </h2>
-                <p className="text-emerald-100 dark:text-black/80">
-                  Join the growing community of students achieving their test score goals
+                <h2 className="text-2xl font-bold mb-4">Technical Specifications</h2>
+                <p className="text-gray-500 dark:text-gray-400">
+                  Learn about the technology stack powering PrepMind.
                 </p>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-8 text-center">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-sm">
                 <div>
-                  <div className="text-3xl font-bold mb-2">50K+</div>
-                  <div className="text-emerald-200 dark:text-black/70">Active Students</div>
+                  <h3 className="font-semibold text-lg mb-2">Frontend Technology</h3>
+                  <ul className="list-disc list-inside space-y-1">
+                    <li>React.js for dynamic interface</li>
+                    <li>Tailwind CSS for utility-first design</li>
+                    <li>JavaScript (ES6+)</li>
+                    <li>Component-based architecture</li>
+                  </ul>
                 </div>
                 <div>
-                  <div className="text-3xl font-bold mb-2">1M+</div>
-                  <div className="text-emerald-200 dark:text-black/70">Questions Answered</div>
-                </div>
-                <div>
-                  <div className="text-3xl font-bold mb-2">200+</div>
-                  <div className="text-emerald-200 dark:text-black/70">Average Score Improvement</div>
-                </div>
-                <div>
-                  <div className="text-3xl font-bold mb-2">95%</div>
-                  <div className="text-emerald-200 dark:text-black/70">Student Satisfaction</div>
+                  <h3 className="font-semibold text-lg mb-2">Backend & AI</h3>
+                  <ul className="list-disc list-inside space-y-1">
+                    <li>Node.js backend infrastructure</li>
+                    <li>RESTful API design</li>
+                    <li>Together AI language model integration</li>
+                    <li>Real-time response generation</li>
+                  </ul>
                 </div>
               </div>
             </CardContent>
           </Card>
+
         </div>
       </div>
     </Layout>
