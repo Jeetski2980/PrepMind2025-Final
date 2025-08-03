@@ -39,70 +39,90 @@ export default function About() {
             </CardContent>
           </Card>
 
-          {/* Features Grid */}
+          {/* Features Grid - Flip Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
             {/* AI-Powered Learning */}
-            <Card className="bg-card dark:bg-card shadow-card dark:shadow-md border border-border dark:border-border rounded-lg transition-shadow duration-300">
-              <CardContent className="p-6">
-                <div className="w-12 h-12 bg-emerald-100 dark:bg-emerald-400/10 rounded-lg flex items-center justify-center mb-4">
-                  <Brain className="w-6 h-6 text-primary dark:text-primary-foreground" />
+            <div className="flip-card">
+              <div className="flip-content">
+                <div className="flip-back">
+                  <div className="flip-back-content">
+                    <Brain className="w-12 h-12 text-emerald-400 mb-4" />
+                    <strong>AI-Powered Learning</strong>
+                  </div>
                 </div>
-                <h3 className="text-xl font-semibold mb-3 text-foreground dark:text-foreground">
-                  AI-Powered Learning
-                </h3>
-                <p className="text-muted-foreground dark:text-muted-foreground">
-                  Our advanced AI generates unlimited practice questions tailored to your needs, 
-                  with instant feedback and detailed explanations to accelerate your learning.
-                </p>
-              </CardContent>
-            </Card>
+                <div className="flip-front">
+                  <div className="flip-front-content">
+                    <h3 className="text-xl font-semibold mb-4 text-white">AI-Powered Learning</h3>
+                    <p className="text-gray-300 leading-relaxed">
+                      Our advanced AI generates unlimited practice questions tailored to your needs,
+                      with instant feedback and detailed explanations to accelerate your learning.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
 
             {/* Comprehensive Coverage */}
-            <Card className="bg-card dark:bg-card shadow-card dark:shadow-md border border-border dark:border-border rounded-lg transition-shadow duration-300">
-              <CardContent className="p-6">
-                <div className="w-12 h-12 bg-emerald-100 dark:bg-emerald-400/10 rounded-lg flex items-center justify-center mb-4">
-                  <Code className="w-6 h-6 text-primary dark:text-primary-foreground" />
+            <div className="flip-card">
+              <div className="flip-content">
+                <div className="flip-back">
+                  <div className="flip-back-content">
+                    <Code className="w-12 h-12 text-emerald-400 mb-4" />
+                    <strong>Comprehensive Coverage</strong>
+                  </div>
                 </div>
-                <h3 className="text-xl font-semibold mb-3 text-foreground dark:text-foreground">
-                  Comprehensive Coverage
-                </h3>
-                <p className="text-muted-foreground dark:text-muted-foreground">
-                  From SAT and ACT to 15+ AP subjects, PrepMind covers all major standardized tests 
-                  with authentic question styles and up-to-date content.
-                </p>
-              </CardContent>
-            </Card>
+                <div className="flip-front">
+                  <div className="flip-front-content">
+                    <h3 className="text-xl font-semibold mb-4 text-white">Comprehensive Coverage</h3>
+                    <p className="text-gray-300 leading-relaxed">
+                      From SAT and ACT to 15+ AP subjects, PrepMind covers all major standardized tests
+                      with authentic question styles and up-to-date content.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
 
             {/* Platform & Security */}
-            <Card className="bg-card dark:bg-card shadow-card dark:shadow-md border border-border dark:border-border rounded-lg transition-shadow duration-300">
-              <CardContent className="p-6">
-                <div className="w-12 h-12 bg-emerald-100 dark:bg-emerald-400/10 rounded-lg flex items-center justify-center mb-4">
-                  <Shield className="w-6 h-6 text-primary dark:text-primary-foreground" />
+            <div className="flip-card">
+              <div className="flip-content">
+                <div className="flip-back">
+                  <div className="flip-back-content">
+                    <Shield className="w-12 h-12 text-emerald-400 mb-4" />
+                    <strong>Platform & Security</strong>
+                  </div>
                 </div>
-                <h3 className="text-xl font-semibold mb-3 text-foreground dark:text-foreground">
-                  Platform & Security
-                </h3>
-                <p className="text-muted-foreground dark:text-muted-foreground">
-                  The platform is hosted on secure cloud infrastructure with proper SSL certificates and is developed to ensure reliability and safety. 
-                </p>
-              </CardContent>
-            </Card>
+                <div className="flip-front">
+                  <div className="flip-front-content">
+                    <h3 className="text-xl font-semibold mb-4 text-white">Platform & Security</h3>
+                    <p className="text-gray-300 leading-relaxed">
+                      The platform is hosted on secure cloud infrastructure with proper SSL certificates and is developed to ensure reliability and safety.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
 
-            {/* Community Driven */}
-            <Card className="bg-card dark:bg-card shadow-card dark:shadow-md border border-border dark:border-border rounded-lg transition-shadow duration-300">
-              <CardContent className="p-6">
-                <div className="w-12 h-12 bg-emerald-100 dark:bg-emerald-400/10 rounded-lg flex items-center justify-center mb-4">
-                  <Users className="w-6 h-6 text-primary dark:text-primary-foreground" />
+            {/* Student-Focused */}
+            <div className="flip-card">
+              <div className="flip-content">
+                <div className="flip-back">
+                  <div className="flip-back-content">
+                    <Users className="w-12 h-12 text-emerald-400 mb-4" />
+                    <strong>Student-Focused</strong>
+                  </div>
                 </div>
-                <h3 className="text-xl font-semibold mb-3 text-foreground dark:text-foreground">
-                  Student-Focused
-                </h3>
-                <p className="text-muted-foreground dark:text-muted-foreground">
-                  Built by educators who understand the challenges students face, PrepMind adapts 
-                  to individual learning styles and provides personalized guidance.
-                </p>
-              </CardContent>
-            </Card>
+                <div className="flip-front">
+                  <div className="flip-front-content">
+                    <h3 className="text-xl font-semibold mb-4 text-white">Student-Focused</h3>
+                    <p className="text-gray-300 leading-relaxed">
+                      Built by educators who understand the challenges students face, PrepMind adapts
+                      to individual learning styles and provides personalized guidance.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
 
           {/* Technology Section */}
