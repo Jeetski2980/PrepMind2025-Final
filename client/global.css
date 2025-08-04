@@ -754,6 +754,53 @@
     transition-duration: 0.3s;
   }
 
+  /* Animated text for Everything You Need to Succeed heading */
+  .animated-text-button {
+    --animation-color: #0f9d58;
+    --fs-size: 2em;
+    letter-spacing: 3px;
+    font-size: var(--fs-size);
+    font-family: Arial Black, Arial, Helvetica, sans-serif;
+    font-weight: bold;
+    position: relative;
+    color: #1a1a1a;
+    text-transform: uppercase;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    overflow: hidden;
+    padding: 0;
+  }
+
+  /* Dark mode adaptation */
+  .dark .animated-text-button {
+    color: white;
+  }
+
+  /* text below */
+  .actual-text,
+  .hover-text {
+    display: inline-block;
+    white-space: nowrap;
+    transition: color 0.5s ease;
+  }
+
+  .hover-text {
+    position: absolute;
+    top: 0;
+    left: 0;
+    color: var(--animation-color);
+    max-width: 0;
+    overflow: hidden;
+    transition: max-width 0.5s ease;
+  }
+
+  /* hover */
+  .animated-text-button:hover .hover-text {
+    max-width: 100%;
+    filter: drop-shadow(0 0 8px var(--animation-color));
+  }
+
   /* New button design for Meet Your AI Tutor */
   .button {
     display: inline-block;
