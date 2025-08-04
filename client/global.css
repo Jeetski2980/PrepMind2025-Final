@@ -440,9 +440,13 @@
       #0F9D58,
       #0F9D58,
       #0F9D58,
+      #0F9D58,
+      #0F9D58,
+      #0F9D58,
+      #0F9D58,
       transparent
     );
-    width: 200px;
+    width: 300px;
   }
 
   /* Custom UI Switch for dark/light mode toggle */
