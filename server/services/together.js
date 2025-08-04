@@ -13,7 +13,7 @@ Requirements:
 - Realistic questions for actual ${testType} exams
 - 4 answer choices each
 - Mix of difficulty levels (Easy, Medium, Hard)
-- Clear explanations
+- Detailed explanations that are 3-5 sentences long, explaining the concept, why the correct answer is right, why other options are wrong, and providing helpful tips or context
 - Proper academic language
 
 Format as JSON:
