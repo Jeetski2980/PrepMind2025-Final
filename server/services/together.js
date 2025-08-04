@@ -144,7 +144,7 @@ function createFallbackQuestions(testType, subject, numQuestions) {
       question: "The word 'deliberate' most nearly means:",
       choices: ["intentional", "slow", "careful", "thoughtful"],
       correct_answer: 0,
-      explanation: "'Deliberate' means intentional or done on purpose.",
+      explanation: "The word 'deliberate' as an adjective means intentional, carefully planned, or done on purpose. It comes from the Latin 'deliberatus' meaning 'weighed' or 'considered carefully'. In test contexts, 'deliberate' often contrasts with accidental or spontaneous actions. When you see this word on reading comprehension passages, it usually suggests that someone made a conscious, thoughtful decision.",
       difficulty: "Medium"
     }
   ];
