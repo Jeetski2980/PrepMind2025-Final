@@ -75,9 +75,10 @@ export default function Index() {
       <section className="py-20 bg-white dark:bg-black">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
-              Everything You Need to Succeed
-            </h2>
+            <button className="animated-text-button mb-4" data-text="Everything You Need to Succeed">
+              <span className="actual-text">Everything You Need to Succeed</span>
+              <span aria-hidden="true" className="hover-text">Everything You Need to Succeed</span>
+            </button>
             <p className="text-xl text-gray-600 dark:text-white/70 max-w-3xl mx-auto">
               Advanced AI technology meets personalized learning to give you the edge you need
             </p>
