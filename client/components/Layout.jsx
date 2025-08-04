@@ -72,8 +72,12 @@ export default function Layout({ children }) {
             </nav>
 
             {/* Theme Toggle */}
-            <label className="ui-switch" onClick={handleThemeToggle}>
-              <input type="checkbox" checked={isDarkMode} readOnly />
+            <label className="ui-switch">
+              <input
+                type="checkbox"
+                checked={isDarkMode}
+                onChange={handleThemeToggle}
+              />
               <div className="slider">
                 <div className="circle"></div>
               </div>
