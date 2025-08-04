@@ -241,6 +241,21 @@ export default function Practice() {
                   >
                     {isGenerating ? "Generating Questions..." : "Generate Practice Questions"}
                   </Button>
+
+                  {/* Loader Animation */}
+                  {isGenerating && (
+                    <div className="loader">
+                      <div className="cell d-0"></div>
+                      <div className="cell d-1"></div>
+                      <div className="cell d-2"></div>
+                      <div className="cell d-1"></div>
+                      <div className="cell d-2"></div>
+                      <div className="cell d-2"></div>
+                      <div className="cell d-3"></div>
+                      <div className="cell d-3"></div>
+                      <div className="cell d-4"></div>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </div>
