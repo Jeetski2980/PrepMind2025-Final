@@ -287,6 +287,30 @@ To contribute to PrepMind:
 
 This project is open source and available under the MIT License.
 
+## Recent Updates
+
+### Latest UI/UX Improvements (2024)
+
+**Enhanced User Experience:**
+- ✅ **AI Tutor Icon Update**: Replaced generic robot icon with custom PrepMind logo SVG for better brand consistency
+- ✅ **Dark/Light Mode Fix**: Fixed toggle functionality with proper event handling and smooth transitions
+- ✅ **Enhanced Explanations**: Made practice question explanations 3-5 sentences long with detailed concept explanations and helpful tips
+- ✅ **Custom Button Redesign**: Replaced "Meet Your AI Tutor" button with custom design featuring smooth hover animations
+- ✅ **Animated Text Effects**: Added animated text feature to "Everything You Need to Succeed" heading with color-changing hover effects
+
+**Visual Enhancements:**
+- ✅ **Enhanced Flip Cards**: Made About page flip card border animations 3x bolder and more prominent
+- ✅ **Improved FAQ Button**: Moved floating FAQ button position for better tooltip visibility
+- ✅ **Typography Updates**: Increased Technical Specifications text size for better readability
+- ✅ **Clean Footer**: Removed outline from copyright text for cleaner appearance
+- ✅ **Loading Animations**: Added engaging loader animation for practice question generation
+
+**Technical Improvements:**
+- ✅ **Database Architecture**: No traditional database - uses API services (OpenAI, Together AI) for AI-powered features
+- ✅ **Responsive Design**: All new features are fully responsive and work across all device sizes
+- ✅ **Accessibility**: Maintained accessibility standards while adding visual enhancements
+- ✅ **Performance**: Optimized animations and transitions for smooth performance
+
 ## Support
 
 For issues or questions:
