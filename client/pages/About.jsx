@@ -175,14 +175,14 @@ export default function About() {
                 <div className="w-12 h-12 bg-emerald-100 dark:bg-emerald-400/10 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Settings className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
                 </div>
-                <h2 className="text-2xl font-bold mb-4 text-foreground dark:text-foreground">
+                <h2 className="text-3xl font-bold mb-4 text-foreground dark:text-foreground">
                   Technical Specifications
                 </h2>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-sm">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-base">
                 <div>
-                  <h3 className="font-semibold text-lg mb-2 text-foreground dark:text-foreground">
+                  <h3 className="font-semibold text-xl mb-2 text-foreground dark:text-foreground">
                     Frontend Technology
                   </h3>
                   <ul className="list-disc list-inside space-y-1 text-muted-foreground dark:text-muted-foreground">
@@ -193,7 +193,7 @@ export default function About() {
                   </ul>
                 </div>
                 <div className="flex flex-col items-center">
-                  <h3 className="font-semibold text-lg mb-4 text-foreground dark:text-foreground text-center">
+                  <h3 className="font-semibold text-xl mb-4 text-foreground dark:text-foreground text-center">
                     Code on GitHub
                   </h3>
                   <a
@@ -208,7 +208,7 @@ export default function About() {
                   </a>
                 </div>
                 <div>
-                  <h3 className="font-semibold text-lg mb-2 text-foreground dark:text-foreground">
+                  <h3 className="font-semibold text-xl mb-2 text-foreground dark:text-foreground">
                     Backend & AI
                   </h3>
                   <ul className="list-disc list-inside space-y-1 text-muted-foreground dark:text-muted-foreground">
