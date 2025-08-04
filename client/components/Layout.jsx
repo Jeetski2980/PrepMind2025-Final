@@ -72,18 +72,12 @@ export default function Layout({ children }) {
             </nav>
 
             {/* Theme Toggle */}
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleThemeToggle}
-              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800"
-            >
-              {isDarkMode ? (
-                <Sun className="w-5 h-5 text-yellow-500" />
-              ) : (
-                <Moon className="w-5 h-5 text-gray-600" />
-              )}
-            </Button>
+            <label className="ui-switch" onClick={handleThemeToggle}>
+              <input type="checkbox" checked={isDarkMode} readOnly />
+              <div className="slider">
+                <div className="circle"></div>
+              </div>
+            </label>
           </div>
 
           {/* Mobile Navigation */}
