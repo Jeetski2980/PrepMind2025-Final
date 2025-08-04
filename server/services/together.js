@@ -125,7 +125,7 @@ function createFallbackQuestions(testType, subject, numQuestions) {
       question: "If 3x + 7 = 22, what is the value of x?",
       choices: ["x = 5", "x = 7", "x = 15", "x = 29"],
       correct_answer: 0,
-      explanation: "Subtract 7 from both sides: 3x = 15. Then divide by 3: x = 5.",
+      explanation: "To solve this linear equation, we need to isolate the variable x. First, subtract 7 from both sides: 3x + 7 - 7 = 22 - 7, which gives us 3x = 15. Next, divide both sides by 3 to get x = 5. We can verify this by substituting back: 3(5) + 7 = 15 + 7 = 22. This type of algebraic manipulation is fundamental for SAT math problems.",
       difficulty: "Easy"
     },
     {
