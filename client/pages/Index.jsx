@@ -94,8 +94,8 @@ export default function Index() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {/* Feature 1 */}
-            <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow dark:bg-black dark:border dark:border-white/20">
-              <CardContent className="p-8 text-center">
+            <div className="card shadow-lg hover:shadow-xl transition-shadow">
+              <div className="p-8 text-center relative z-10">
                 <div className="w-16 h-16 bg-emerald-100 dark:bg-emerald-400/10 rounded-lg flex items-center justify-center mx-auto mb-6">
                   <Brain className="w-8 h-8 text-emerald-600 dark:text-emerald-400" />
                 </div>
@@ -103,12 +103,12 @@ export default function Index() {
                 <p className="text-gray-600 dark:text-white/70 leading-relaxed">
                   Get unlimited practice questions tailored to your skill level and difficulty level. Our AI creates fresh content that mirrors real exam patterns.
                 </p>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
 
             {/* Feature 2 */}
-            <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow dark:bg-black dark:border dark:border-white/20">
-              <CardContent className="p-8 text-center">
+            <div className="card shadow-lg hover:shadow-xl transition-shadow">
+              <div className="p-8 text-center relative z-10">
                 <div className="w-16 h-16 bg-emerald-100 dark:bg-emerald-400/10 rounded-lg flex items-center justify-center mx-auto mb-6">
                   <BookOpen className="w-8 h-8 text-emerald-600 dark:text-emerald-400" />
                 </div>
@@ -116,12 +116,12 @@ export default function Index() {
                 <p className="text-gray-600 dark:text-white/70 leading-relaxed">
                   Never wonder why an answer is correct. Get detailed, step-by-step explanations that help you understand the concepts.
                 </p>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
 
             {/* Feature 3 */}
-            <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow dark:bg-black dark:border dark:border-white/20">
-              <CardContent className="p-8 text-center">
+            <div className="card shadow-lg hover:shadow-xl transition-shadow">
+              <div className="p-8 text-center relative z-10">
                 <div className="w-16 h-16 bg-emerald-100 dark:bg-emerald-400/10 rounded-lg flex items-center justify-center mx-auto mb-6">
                   <MessageSquare className="w-8 h-8 text-emerald-600 dark:text-emerald-400" />
                 </div>
@@ -129,8 +129,8 @@ export default function Index() {
                 <p className="text-gray-600 dark:text-white/70 leading-relaxed">
                   Ask questions anytime, anywhere. Our AI tutor provides personalized help with concepts, strategies, and test-taking techniques.
                 </p>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           </div>
         </div>
       </section>
