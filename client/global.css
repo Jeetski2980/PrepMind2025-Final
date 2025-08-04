@@ -880,4 +880,11 @@
   [class*="border-"]:not(.border-0):not([class*="border-emerald"]):not([class*="border-green"]):not([class*="border-white"]):not([class*="border-black"]) {
     border-width: 2px !important;
   }
+
+  /* Remove outline from copyright text */
+  footer p {
+    outline: none !important;
+    text-shadow: none !important;
+    border: none !important;
+  }
 }
