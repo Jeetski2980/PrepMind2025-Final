@@ -10,7 +10,7 @@ export default function About() {
           {/* Header */}
           <div className="text-center mb-12">
             <div className="w-16 h-16 bg-emerald-100 dark:bg-emerald-400/10 rounded-full flex items-center justify-center mx-auto mb-6">
-              <Brain className="w-8 h-8 text-primary dark:text-primary-foreground" />
+              <Brain className="w-8 h-8 text-emerald-600 dark:text-emerald-400" />
             </div>
             <h1 className="text-4xl font-bold mb-4">{/* Using theme colors */}
               <span className="text-foreground dark:text-foreground">About PrepMind</span>
