@@ -133,7 +133,7 @@ function createFallbackQuestions(testType, subject, numQuestions) {
       question: "What is the slope between points (2, 5) and (6, 13)?",
       choices: ["2", "4", "8", "1/2"],
       correct_answer: 0,
-      explanation: "Use slope formula: (13-5)/(6-2) = 8/4 = 2.",
+      explanation: "The slope between two points is calculated using the formula: slope = (y₂ - y₁)/(x₂ - x₁). Substituting our points (2, 5) and (6, 13): slope = (13 - 5)/(6 - 2) = 8/4 = 2. This means for every 1 unit increase in x, y increases by 2 units. Understanding slope is crucial for coordinate geometry questions on standardized tests.",
       difficulty: "Medium"
     }
   ];
