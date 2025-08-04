@@ -130,7 +130,7 @@ export default function About() {
             <CardContent className="p-8">
               <div className="text-center mb-8">
                 <div className="w-12 h-12 bg-emerald-100 dark:bg-emerald-400/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Zap className="w-6 h-6 text-primary dark:text-primary-foreground" />
+                  <Zap className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
                 </div>
                 <h2 className="text-2xl font-bold mb-4 text-foreground dark:text-foreground">
                   Powered by Advanced AI
