@@ -169,13 +169,15 @@ export default function About() {
           </Card>
 
           {/* Technical Specifications Section */}
-          <Card className="bg-card text-foreground dark:bg-card dark:text-foreground shadow-card dark:shadow-md border border-border dark:border-border rounded-lg">
+          <Card className="bg-card dark:bg-card shadow-card dark:shadow-md border border-border dark:border-border rounded-lg mb-12 transition-shadow duration-300">
             <CardContent className="p-8">
               <div className="text-center mb-8">
-                <h2 className="text-2xl font-bold mb-4">Technical Specifications</h2>
-                <p className="text-muted-foreground dark:text-muted-foreground">
-                  Learn about the technology stack powering PrepMind.
-                </p>
+                <div className="w-12 h-12 bg-emerald-100 dark:bg-emerald-400/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Settings className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
+                </div>
+                <h2 className="text-2xl font-bold mb-4 text-foreground dark:text-foreground">
+                  Technical Specifications
+                </h2>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-sm">
