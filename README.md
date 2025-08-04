@@ -81,20 +81,31 @@ The tutor page uses browser APIs for enhanced functionality:
 - Select specific subjects (Math, Reading, Writing, Science, etc.)
 - Optional topic filtering for focused practice
 - Generate 5-20 questions per session
-- Detailed explanations for each answer
+- Enhanced detailed explanations for each answer (3-5 sentences with concept explanations, tips, and context)
 - Progress tracking and scoring
+- Loading animation during question generation
 
 ### AI Tutor Chat
 - Natural language conversation about test prep
 - Voice input and audio output support
 - Focused on educational content
 - Encouraging and supportive responses
+- Custom PrepMind logo icon instead of generic robot icon
 
-### Additional Features
-- Dark mode toggle with system preference detection
+### UI/UX Enhancements
+- Custom UI switch for dark/light mode toggle with smooth animations
+- Dark mode toggle with system preference detection and improved functionality
 - Responsive design for all screen sizes
-- Clean, accessible interface
+- Clean, accessible interface with enhanced animations
 - Fast loading and performance optimized
+- Animated "Everything You Need to Succeed" heading with hover effects
+- Custom styled "Meet Your AI Tutor" button with hover animations
+- Enhanced flip card animations on About page with 3x bolder glowing green borders
+- Rotating border animations on homepage feature cards
+- Floating FAQ button (contact support) positioned for better visibility
+- Improved Technical Specifications section with larger text
+- Outline removed from footer copyright text for cleaner appearance
+- Enhanced visual consistency across dark and light modes
 
 ## Setup and Installation
 
