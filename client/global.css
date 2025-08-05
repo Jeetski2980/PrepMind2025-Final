@@ -944,3 +944,19 @@
 .dark .flip-back-content span {
   color: #cccccc;
 }
+/* Flip card titles in light mode */
+.flip-front-content h3,
+.flip-back-content h3 {
+  color: #1a1a1a;
+  /* black titles */
+  font-weight: 600;
+}
+
+/* Flip card paragraph/body text in light mode */
+.flip-front-content p,
+.flip-back-content p,
+.flip-front-content span,
+.flip-back-content span {
+  color: #555555;
+  /* gray text */
+}
