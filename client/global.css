@@ -915,3 +915,32 @@
     border: none !important;
   }
 }
+/* Flip card titles (like "AI-powered learning") */
+.flip-front-content h3,
+.flip-back-content h3 {
+  color: #1a1a1a;
+  /* black title in light mode */
+  font-weight: 600;
+}
+
+/* Flip card paragraph or other text */
+.flip-front-content p,
+.flip-back-content p,
+.flip-front-content span,
+.flip-back-content span {
+  color: #555555;
+  /* soft gray for body text */
+}
+
+/* Optional: force dark mode versions */
+.dark .flip-front-content h3,
+.dark .flip-back-content h3 {
+  color: white;
+}
+
+.dark .flip-front-content p,
+.dark .flip-back-content p,
+.dark .flip-front-content span,
+.dark .flip-back-content span {
+  color: #cccccc;
+}
