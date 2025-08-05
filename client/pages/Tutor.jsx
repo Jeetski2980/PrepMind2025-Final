@@ -269,7 +269,7 @@ export default function Tutor() {
   const [isLoading, setIsLoading] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
-  const [shouldAutoScroll, setShouldAutoScroll] = useState(flase);
+  const [shouldAutoScroll, setShouldAutoScroll] = useState(false);
   
   const messagesEndRef = useRef(null);
   const messagesContainerRef = useRef(null);
