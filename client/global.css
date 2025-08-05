@@ -6,7 +6,7 @@
 @layer base {
   /**
    * CSS Variables for Tailwind Theme (HSL Format)
-   * Syncs with tailwind.config.js
+   * Syncs with tailwind.config.jss
    */
   :root {
     --background: 0 0% 100%;
