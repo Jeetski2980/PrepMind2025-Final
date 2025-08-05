@@ -185,12 +185,12 @@ export default function About() {
                   <h3 className="font-semibold text-xl mb-2 text-foreground dark:text-foreground">
                     Frontend Technology
                   </h3>
-                  <ul className="list-disc list-inside space-y-1 text-muted-foreground dark:text-muted-foreground">
-                    <li>React.js for dynamic interface</li>
-                    <li>Tailwind CSS for utility-first design</li>
-                    <li>JavaScript (ES6+)</li>
-                    <li>Component-based architecture</li>
-                  </ul>
+                  <div className="space-y-1 text-muted-foreground dark:text-muted-foreground">
+                    <div>React.js for dynamic interface.</div>
+                    <div>Tailwind CSS for utility-first design.</div>
+                    <div>JavaScript (ES6+).</div>
+                    <div>Component-based architecture.</div>
+                  </div>
                 </div>
                 <div className="flex flex-col items-center">
                   <h3 className="font-semibold text-xl mb-4 text-foreground dark:text-foreground text-center">
@@ -211,12 +211,12 @@ export default function About() {
                   <h3 className="font-semibold text-xl mb-2 text-foreground dark:text-foreground">
                     Backend & AI
                   </h3>
-                  <ul className="list-disc list-inside space-y-1 text-muted-foreground dark:text-muted-foreground">
-                    <li>Node.js backend infrastructure</li>
-                    <li>RESTful API design</li>
-                    <li>Together AI language model integration</li>
-                    <li>Real-time response generation</li>
-                  </ul>
+                  <div className="space-y-1 text-muted-foreground dark:text-muted-foreground">
+                    <div>Node.js backend infrastructure.</div>
+                    <div>RESTful API design.</div>
+                    <div>Together AI language model integration.</div>
+                    <div>Real-time response generation.</div>
+                  </div>
                 </div>
               </div>
             </CardContent>
