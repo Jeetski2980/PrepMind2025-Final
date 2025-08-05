@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { BookOpen, CheckCircle, XCircle, Lightbulb, RotateCcw } from "lucide-react";
 import Layout from "@/components/Layout";
 import ApiKeyNotice from "@/components/ApiKeyNotice";
+import { InlineMath, BlockMath } from 'react-katex';
 
 const TEST_SUBJECTS = {
   "SAT": ["Math", "Reading", "Writing"],
