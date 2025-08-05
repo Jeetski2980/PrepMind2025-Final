@@ -214,7 +214,7 @@ export default function About() {
                   <ul className="list-disc list-inside space-y-1 text-muted-foreground dark:text-muted-foreground">
                     <li className="whitespace-nowrap">Node.js backend infrastructure.</li>
                     <li className="whitespace-nowrap">RESTful API design.</li>
-                    <li className="whitespace-nowrap">Together AI language model integration.</li>
+                    <li className="whitespace-nowrap">Together AI integration.</li>
                     <li className="whitespace-nowrap">Real-time response generation.</li>
                   </ul>
                 </div>
