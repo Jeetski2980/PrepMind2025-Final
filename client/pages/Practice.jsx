@@ -42,6 +42,43 @@ const TOPIC_OPTIONS = {
   "Computer Science A": ["Object-Oriented Programming", "Data Structures", "Algorithms", "Program Design"]
 };
 
+// Math rendering function for explanations
+const renderTextWithMath = (text) => {
+  // Handle inline math expressions (single $) and display math (double $$)
+  const mathRegex = /(\$\$[^$]+\$\$|\$[^$]+\$)/g;
+  const parts = text.split(mathRegex);
+
+  return parts.map((part, index) => {
+    if (part.startsWith('$$') && part.endsWith('$$')) {
+      // Display math (block)
+      const mathContent = part.slice(2, -2);
+      try {
+        return <BlockMath key={index} math={mathContent} />;
+      } catch (error) {
+        return <span key={index}>{part}</span>;
+      }
+    } else if (part.startsWith('$') && part.endsWith('$')) {
+      // Inline math
+      const mathContent = part.slice(1, -1);
+      try {
+        return <InlineMath key={index} math={mathContent} />;
+      } catch (error) {
+        return <span key={index}>{part}</span>;
+      }
+    } else {
+      // Regular text with bold formatting
+      return (
+        <span
+          key={index}
+          dangerouslySetInnerHTML={{
+            __html: part.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+          }}
+        />
+      );
+    }
+  });
+};
+
 export default function Practice() {
   const [testType, setTestType] = useState("");
   const [subject, setSubject] = useState("");
