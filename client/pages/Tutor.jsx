@@ -32,10 +32,6 @@ const AppleTouchIcon = () => (
   </svg>
 );
 
-export default AppleTouchIcon;
-
-
-
 export default function Tutor() {
   const [messages, setMessages] = useState([
     {
