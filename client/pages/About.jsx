@@ -143,7 +143,7 @@ export default function About() {
                     Meta-Llama-3.1
                   </h3>
                   <p className="text-muted-foreground dark:text-muted-foreground">
-                    Powered by state-of-the-art language models through its API for intelligent question generation and explanations.
+                    Powered by state-of-the-art language models through Together AI API for intelligent question generation and explanations.
                   </p>
                 </div>
 
