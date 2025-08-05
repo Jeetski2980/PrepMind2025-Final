@@ -449,7 +449,16 @@
     color: white;
     text-align: center;
   }
+/* Light mode styles for flip cards */
+.flip-front,
+.flip-back {
+  background-color: #f9f9f9;
+  /* light gray */
+}
 
+.flip-back-content {
+  background-color: #f9f9f9;
+}
   /* Dark mode adaptations for flip cards */
   .dark .flip-front, .dark .flip-back {
     background-color: #1a1a1a;
@@ -459,7 +468,7 @@
     background-color: #1a1a1a;
   }
 
-  /* Make flip card border animation 3x bolder */
+  /* Make flip card border animation */
   .flip-back::before {
     background: linear-gradient(
       90deg,
