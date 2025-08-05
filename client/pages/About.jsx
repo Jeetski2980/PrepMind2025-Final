@@ -186,10 +186,10 @@ export default function About() {
                     Frontend Technology
                   </h3>
                   <ul className="list-disc list-inside space-y-1 text-muted-foreground dark:text-muted-foreground">
-                    <li>React.js for dynamic interface</li>
-                    <li>Tailwind CSS for utility-first design</li>
-                    <li>JavaScript (ES6+)</li>
-                    <li>Component-based architecture</li>
+                    <li>React.js for dynamic interface.</li>
+                    <li>Tailwind CSS for utility-first design.</li>
+                    <li>JavaScript (ES6+).</li>
+                    <li>Component-based architecture.</li>
                   </ul>
                 </div>
                 <div className="flex flex-col items-center">
@@ -212,15 +212,16 @@ export default function About() {
                     Backend & AI
                   </h3>
                   <ul className="list-disc list-inside space-y-1 text-muted-foreground dark:text-muted-foreground">
-                    <li>Node.js backend infrastructure</li>
-                    <li>RESTful API design</li>
-                    <li>Together AI language model integration</li>
-                    <li>Real-time response generation</li>
+                    <li>Node.js backend infrastructure.</li>
+                    <li>RESTful API design.</li>
+                    <li>Together AI language model integration.</li>
+                    <li>Real-time response generation.</li>
                   </ul>
                 </div>
               </div>
             </CardContent>
           </Card>
+
         </div>
       </div>
     </Layout>
