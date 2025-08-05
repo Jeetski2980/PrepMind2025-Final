@@ -960,3 +960,8 @@
   color: #555555;
   /* gray text */
 }
+/* Fix unreadable front side in dark mode */
+.dark .flip-front-content {
+  background-color: #1a1a1a;
+  color: white;
+}
