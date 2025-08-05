@@ -908,7 +908,7 @@
     border-width: 2px !important;
   }
 
-  /* Remove outline from copyright text */
+  /* Remove outline from text */
   footer p {
     outline: none !important;
     text-shadow: none !important;
