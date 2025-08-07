@@ -567,7 +567,7 @@ export default function Tutor() {
                 <div className="flex justify-start">
                   <div className="flex items-start space-x-3">
                     <div className="w-8 h-8 rounded-full bg-emerald-400 dark:bg-emerald-400 flex items-center justify-center">
-                      <AppleTouchIcon className="w-4 h-4 text-white dark:text-black" />
+                      <Bot className="w-4 h-4 text-white dark:text-black" />
                     </div>
                     <div className="bg-white dark:bg-black border dark:border-white/30 p-4 rounded-2xl rounded-bl-md">
                       <div className="flex space-x-1">
