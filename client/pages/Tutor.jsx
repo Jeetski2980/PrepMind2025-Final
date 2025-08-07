@@ -10,6 +10,7 @@ import {
   Volume2,
   VolumeX,
   User,
+  Bot,
 } from "lucide-react";
 import Layout from "@/components/Layout";
 import ApiKeyNotice from "@/components/ApiKeyNotice";
