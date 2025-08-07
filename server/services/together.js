@@ -85,7 +85,9 @@ Provide a helpful response following these formatting rules:
 - Use **bold text** for final answers and important formulas
 - Use $inline math$ for mathematical expressions (e.g., $x = 5$, $\\frac{a}{b}$)
 - Use $$display math$$ for longer equations (e.g., $$\\int_0^1 x^2 dx$$)
-- Wrap 1-2 sentence explanations/summaries with <highlight>explanation here</highlight>
+- For multi-step problems, wrap EACH individual step with <highlight>step explanation here</highlight>
+- For concept explanations, highlight key insights with <highlight>important concept</highlight>
+- Use multiple highlight tags to emphasize different steps and concepts throughout your response
 - Clear explanations with practical study tips
 - Encouraging tone focused on test preparation
 
