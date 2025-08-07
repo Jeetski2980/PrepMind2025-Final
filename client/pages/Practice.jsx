@@ -44,9 +44,35 @@ const TOPIC_OPTIONS = {
 
 // Math rendering function for explanations
 const renderTextWithMath = (text) => {
+  // First, convert common plain text math patterns to LaTeX
+  let processedText = text
+    // Convert fractions like (a/b) to $\frac{a}{b}$
+    .replace(/\((\w+)\/(\w+)\)/g, '$\\frac{$1}{$2}$')
+    // Convert simple fractions like a/b (but not URLs or dates)
+    .replace(/\b(\d+)\/(\d+)\b/g, '$\\frac{$1}{$2}$')
+    // Convert powers like x^2, x^3, etc.
+    .replace(/(\w+)\^(\d+)/g, '$$$1^{$2}$$')
+    // Convert powers with parentheses like (x+1)^2
+    .replace(/\(([^)]+)\)\^(\d+)/g, '$($1)^{$2}$')
+    // Convert square roots like √x
+    .replace(/√(\w+)/g, '$\\sqrt{$1}$')
+    // Convert integrals like ��
+    .replace(/∫/g, '$\\int$')
+    // Convert Greek letters
+    .replace(/π/g, '$\\pi$')
+    .replace(/θ/g, '$\\theta$')
+    .replace(/α/g, '$\\alpha$')
+    .replace(/β/g, '$\\beta$')
+    .replace(/γ/g, '$\\gamma$')
+    .replace(/δ/g, '$\\delta$')
+    .replace(/λ/g, '$\\lambda$')
+    .replace(/μ/g, '$\\mu$')
+    .replace(/σ/g, '$\\sigma$')
+    .replace(/Σ/g, '$\\Sigma$');
+
   // Handle inline math expressions (single $) and display math (double $$)
   const mathRegex = /(\$\$[^$]+\$\$|\$[^$]+\$)/g;
-  const parts = text.split(mathRegex);
+  const parts = processedText.split(mathRegex);
 
   return parts.map((part, index) => {
     if (part.startsWith('$$') && part.endsWith('$$')) {
