@@ -152,6 +152,7 @@ Return ONLY valid JSON:
           const retryQuestions = retryData.questions || [];
 
           if (retryQuestions.length > 0) {
+            console.log(`✅ Retry successful: generated ${retryQuestions.length} AI questions for ${testType} ${subject}${topicText}`);
             return retryQuestions.map((q, index) => ({
               id: index + 1,
               question: q.question || "Question unavailable",
