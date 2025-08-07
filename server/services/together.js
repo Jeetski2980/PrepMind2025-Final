@@ -6,7 +6,9 @@ const together = new Together({
 
 export async function generateQuestions(testType, subject, topic, numQuestions) {
   const topicText = topic ? ` focusing on ${topic}` : "";
-  
+
+  console.log(`🤖 Generating ${numQuestions} AI questions for: ${testType} ${subject}${topicText}`);
+
   const prompt = `Generate ${numQuestions} multiple choice questions for ${testType} ${subject}${topicText}.
 
 CRITICAL REQUIREMENTS:
