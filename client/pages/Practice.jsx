@@ -42,8 +42,10 @@ const TOPIC_OPTIONS = {
   "Computer Science A": ["Object-Oriented Programming", "Data Structures", "Algorithms", "Program Design"]
 };
 
-// Math rendering function for explanations
+// Math rendering function for all text (questions, choices, explanations)
 const renderTextWithMath = (text) => {
+  if (!text) return text;
+
   // First, convert common plain text math patterns to LaTeX
   let processedText = text
     // Convert fractions like (a/b) to $\frac{a}{b}$
@@ -54,9 +56,10 @@ const renderTextWithMath = (text) => {
     .replace(/(\w+)\^(\d+)/g, '$$$1^{$2}$$')
     // Convert powers with parentheses like (x+1)^2
     .replace(/\(([^)]+)\)\^(\d+)/g, '$($1)^{$2}$')
-    // Convert square roots like √x
+    // Convert square roots like √x or sqrt(x)
     .replace(/√(\w+)/g, '$\\sqrt{$1}$')
-    // Convert integrals like ��
+    .replace(/sqrt\(([^)]+)\)/g, '$\\sqrt{$1}$')
+    // Convert integrals like ∫
     .replace(/∫/g, '$\\int$')
     // Convert Greek letters
     .replace(/π/g, '$\\pi$')
