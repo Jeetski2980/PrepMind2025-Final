@@ -15,6 +15,9 @@ Requirements:
 - Mix of difficulty levels (Easy, Medium, Hard)
 - Detailed explanations that are 3-5 sentences long, explaining the concept, why the correct answer is right, why other options are wrong, and providing helpful tips or context
 - Proper academic language
+- For mathematical expressions, use LaTeX syntax: $x^2$ for powers, $\frac{a}{b}$ for fractions, $\sqrt{x}$ for square roots, etc.
+- Wrap inline math in single $ signs: $2x + 3$
+- Wrap display math in double $$ signs: $$\int_0^1 x^2 dx$$
 
 Format as JSON:
 {
