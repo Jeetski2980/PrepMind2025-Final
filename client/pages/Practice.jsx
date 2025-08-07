@@ -351,9 +351,9 @@ export default function Practice() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-gray-900 dark:text-white mb-6 text-lg">
-                      {questions[currentQuestion]?.question}
-                    </p>
+                    <div className="text-gray-900 dark:text-white mb-6 text-lg">
+                      {renderTextWithMath(questions[currentQuestion]?.question)}
+                    </div>
 
                     <div className="space-y-3">
                       {questions[currentQuestion]?.choices.map((choice, index) => (
@@ -370,7 +370,7 @@ export default function Practice() {
                             <span className="w-8 h-8 rounded-full border-2 border-current flex items-center justify-center mr-3 text-sm font-semibold">
                               {String.fromCharCode(65 + index)}
                             </span>
-                            <span className="text-gray-900 dark:text-white">{choice}</span>
+                            <span className="text-gray-900 dark:text-white">{renderTextWithMath(choice)}</span>
                           </div>
                         </button>
                       ))}
@@ -428,7 +428,7 @@ export default function Practice() {
                           )}
                         </div>
 
-                        <p className="text-gray-900 dark:text-white mb-4">{question.question}</p>
+                        <div className="text-gray-900 dark:text-white mb-4">{renderTextWithMath(question.question)}</div>
 
                         <div className="space-y-2 mb-4">
                           {question.choices.map((choice, cIndex) => (
@@ -445,7 +445,7 @@ export default function Practice() {
                               <span className="font-medium">
                                 {String.fromCharCode(65 + cIndex)}.
                               </span>
-                              <span className="ml-2 text-gray-900 dark:text-white">{choice}</span>
+                              <span className="ml-2 text-gray-900 dark:text-white">{renderTextWithMath(choice)}</span>
                             </div>
                           ))}
                         </div>
