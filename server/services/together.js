@@ -168,6 +168,7 @@ Return ONLY valid JSON:
       }
     }
 
+    console.warn(`⚠️  FALLING BACK to hardcoded questions for ${testType} ${subject}${topicText} - AI generation failed`);
     return createFallbackQuestions(testType, subject, numQuestions);
   }
 }
