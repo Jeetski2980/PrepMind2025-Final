@@ -5,13 +5,17 @@ const together = new Together({
 });
 
 export async function generateQuestions(testType, subject, topic, numQuestions) {
-  // Verify API key exists
-  if (!process.env.TOGETHER_API_KEY) {
-    throw new Error("TOGETHER_API_KEY environment variable is not set");
-  }
-
   const topicText = topic ? ` focusing on ${topic}` : "";
   console.log(`🤖 Generating ${numQuestions} AI questions for: ${testType} ${subject}${topicText}`);
+
+  // Check API key
+  const apiKey = process.env.TOGETHER_API_KEY;
+  console.log(`API Key present: ${apiKey ? 'YES' : 'NO'}, Length: ${apiKey ? apiKey.length : 0}`);
+
+  if (!apiKey) {
+    console.warn("⚠️ No API key found, using local question generation");
+    return generateLocalQuestions(testType, subject, topic, numQuestions);
+  }
 
   // Streamlined prompt for faster generation
   const prompt = `Generate ${numQuestions} ${testType} ${subject}${topicText} multiple choice questions.
