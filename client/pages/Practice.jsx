@@ -127,7 +127,13 @@ export default function Practice() {
     if (!testType || !subject) return;
 
     setIsGenerating(true);
+    setError("");
+
     try {
+      // Add timeout for faster response
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 6000); // 6 second timeout
+
       const response = await fetch('/api/generate-questions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -136,17 +142,33 @@ export default function Practice() {
           subject,
           topic: topic || "General",
           numQuestions: parseInt(numQuestions)
-        })
+        }),
+        signal: controller.signal
       });
+
+      clearTimeout(timeoutId);
 
       if (response.ok) {
         const data = await response.json();
-        setQuestions(data.questions);
-        setCurrentQuestion(0);
-        setSelectedAnswers({});
-        setShowResults(false);
+        if (data.questions && data.questions.length > 0) {
+          setQuestions(data.questions);
+          setCurrentQuestion(0);
+          setSelectedAnswers({});
+          setShowResults(false);
+          setError("");
+        } else {
+          setError("No questions were generated. Please try again.");
+        }
+      } else {
+        const errorData = await response.json();
+        setError(errorData.error || "Failed to generate questions. Please try again.");
       }
     } catch (error) {
+      if (error.name === 'AbortError') {
+        setError("Request timed out. Please try again with fewer questions.");
+      } else {
+        setError("Error generating questions. Please check your connection and try again.");
+      }
       console.error('Error generating questions:', error);
     }
     setIsGenerating(false);
