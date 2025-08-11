@@ -4,29 +4,49 @@ const together = new Together({
   apiKey: process.env.TOGETHER_API_KEY,
 });
 
-export async function generateQuestions(testType, subject, topic, numQuestions) {
+// ---------- helpers: canonicalize & fingerprint for dedupe ----------
+const canon = (s: string) =>
+  (s || "")
+    .toLowerCase()
+    .replace(/https?:\/\/\S+/g, "")
+    .replace(/[^a-z0-9\s]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
+const fingerprint = (q: any) =>
+  `${canon(q.question)}__${(q.choices || []).map(canon).sort().join("|")}`;
+
+export async function generateQuestions(
+  testType: string,
+  subject: string,
+  topic: string | undefined,
+  numQuestions: number
+) {
   const topicText = topic ? ` focusing on ${topic}` : "";
   console.log(`🤖 Generating ${numQuestions} AI questions for: ${testType} ${subject}${topicText}`);
 
-  // Verify API key exists
   if (!process.env.TOGETHER_API_KEY) {
     throw new Error("TOGETHER_API_KEY environment variable is not set");
   }
 
-  // Optimized prompt for high-quality question generation
-  const prompt = `Create ${numQuestions} multiple choice questions for ${testType} ${subject}${topicText}.
+  // Ask the model for a little extra so we can dedupe & still hit target
+  const target = Number(numQuestions) || 10;
+  const overshoot = Math.max(target * 2, target + 5);
+
+  // Prompt with explicit uniqueness rule
+  const prompt = `Create ${overshoot} multiple choice questions for ${testType} ${subject}${topicText}.
 
 CRITICAL REQUIREMENTS:
-- All questions must be UNIQUE within this batch — do not repeat or rephrase any question from the provided exclude list.
-- Questions must be appropriate for ${testType} ${subject} level
-- Exactly 4 answer choices labeled A, B, C, D
-- One correct answer (index 0-3)
-- Detailed explanations (3-5 sentences)
-- Mix of difficulties: Easy, Medium, Hard
-- Use proper academic language
-- For math: use simple notation like x^2, (a/b), sqrt(x)
-${testType === "AP Exams" ? `- Generate college-level ${subject} questions with advanced concepts` : ""}
-${topic ? `- Focus specifically on ${topic} concepts and problems` : ""}
+- All questions must be UNIQUE within this batch (no repeats or paraphrase duplicates).
+- Questions must be appropriate for ${testType} ${subject} level.
+- Exactly 4 answer choices labeled A, B, C, D.
+- One correct answer (index 0-3) in "correct_answer".
+- Detailed explanations (3-5 sentences).
+- Mix of difficulties: Easy, Medium, Hard (string in "difficulty").
+- Use proper academic language.
+- For math: use simple notation like x^2, (a/b), sqrt(x).
+${testType === "AP Exams" ? `- Generate college-level ${subject} questions with advanced concepts.` : ""}
+${topic ? `- Focus specifically on ${topic} concepts and problems.` : ""}
 
 Return ONLY valid JSON in this exact format:
 {
@@ -49,67 +69,64 @@ Return ONLY valid JSON in this exact format:
           role: "system",
           content: `You are a ${testType} test prep expert. Generate ${subject} questions. Return valid JSON only. Be concise but accurate.`
         },
-        {
-          role: "user",
-          content: prompt
-        }
+        { role: "user", content: prompt }
       ],
       temperature: 0.2,
-      max_tokens: Math.min(3000, numQuestions * 200), // Dynamic token limit based on question count
+      max_tokens: Math.min(3500, overshoot * 220),
       stream: false
     });
 
     const response = completion.choices[0]?.message?.content;
-    if (!response) {
-      throw new Error("No response from AI - API call failed");
-    }
+    if (!response) throw new Error("No response from AI - API call failed");
 
-    // Clean and parse JSON response
+    // Clean & parse JSON
     let jsonText = response.trim();
-
-    // Remove any markdown formatting
     if (jsonText.includes("```")) {
-      jsonText = jsonText.replace(/```json\n?/g, "").replace(/```\n?/g, "").replace(/\n?```$/g, "");
+      jsonText = jsonText.replace(/```json\s*/g, "").replace(/```\s*$/g, "");
     }
-
-    // Find JSON object if response has extra text
     if (!jsonText.startsWith("{")) {
-      const startIndex = jsonText.indexOf("{");
-      const endIndex = jsonText.lastIndexOf("}");
-      if (startIndex !== -1 && endIndex !== -1) {
-        jsonText = jsonText.substring(startIndex, endIndex + 1);
-      }
+      const i = jsonText.indexOf("{");
+      const j = jsonText.lastIndexOf("}");
+      if (i !== -1 && j !== -1) jsonText = jsonText.slice(i, j + 1);
     }
 
     const data = JSON.parse(jsonText);
-    const questions = data.questions || [];
+    const raw = Array.isArray(data.questions) ? data.questions : [];
+    if (raw.length === 0) throw new Error("AI returned empty questions array");
 
-    if (questions.length === 0) {
-      throw new Error("AI returned empty questions array");
+    // ---------- SAME-BATCH DEDUPE ----------
+    const seen = new Set < string > ();
+    const unique: any[] = [];
+    for (const q of raw) {
+      const fp = fingerprint(q);
+      if (!seen.has(fp)) {
+        seen.add(fp);
+        unique.push(q);
+      }
+      if (unique.length >= target) break;
     }
 
-    console.log(`✅ Successfully generated ${questions.length} AI questions for ${testType} ${subject}${topicText}`);
-
-    // Return formatted questions
-    return questions.map((q, index) => ({
+    // Map/normalize & trim
+    const final = unique.slice(0, target).map((q: any, index: number) => ({
       id: index + 1,
       question: q.question || `Question ${index + 1}`,
       choices: Array.isArray(q.choices) ? q.choices.slice(0, 4) : ["A", "B", "C", "D"],
-      correct_answer: typeof q.correct_answer === "number" ? Math.min(3, Math.max(0, q.correct_answer)) : 0,
+      correct_answer:
+        typeof q.correct_answer === "number" ? Math.min(3, Math.max(0, q.correct_answer)) : 0,
       explanation: q.explanation || "Explanation not available",
       difficulty: q.difficulty || "Medium"
-    })).slice(0, numQuestions);
+    }));
 
-  } catch (error) {
+    console.log(`✅ Generated ${final.length}/${target} unique questions for ${testType} ${subject}${topicText}`);
+    return final;
+
+  } catch (error: any) {
     console.error(`❌ AI generation failed for ${testType} ${subject}${topicText}:`, error);
-
-    // NO FALLBACK - Force AI generation only
     throw new Error(`AI question generation failed: ${error.message}. Please try again.`);
   }
 }
 
-
-export async function generateChatResponse(message) {
+export async function generateChatResponse(message: string) {
   const prompt = `You are an expert tutor for SAT, ACT, and AP test prep.
 
 Student question: "${message}"
@@ -134,10 +151,7 @@ Keep responses 2-3 paragraphs with proper math formatting.`;
           role: "system",
           content: "You are PrepMind's AI tutor. Help students with test preparation using proper formatting for math and step-by-step solutions."
         },
-        {
-          role: "user",
-          content: prompt
-        }
+        { role: "user", content: prompt }
       ],
       temperature: 0.7,
       max_tokens: 1000,
@@ -146,7 +160,6 @@ Keep responses 2-3 paragraphs with proper math formatting.`;
 
     const response = completion.choices[0]?.message?.content;
     return response?.trim() || "Sorry, I'm having trouble responding. Please try again.";
-
   } catch (error) {
     console.error("Chat response failed:", error);
     return "I'm experiencing technical difficulties. Please try again in a moment.";
