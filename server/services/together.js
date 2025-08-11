@@ -32,15 +32,16 @@ JSON format only:
       messages: [
         {
           role: "system",
-          content: `You are an expert ${testType} test prep tutor. Create realistic practice questions appropriate for ${testType} ${subject} level. Return ONLY valid JSON with properly escaped strings.`
+          content: `You are a ${testType} test prep expert. Generate ${subject} questions. Return valid JSON only.`
         },
         {
           role: "user",
           content: prompt
         }
       ],
-      temperature: 0.6,
-      max_tokens: 4000
+      temperature: 0.3,
+      max_tokens: 2000,
+      stream: false
     });
 
     const response = completion.choices[0]?.message?.content;
