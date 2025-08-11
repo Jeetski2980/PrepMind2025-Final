@@ -36,7 +36,7 @@ export async function handleGenerateQuestions(req, res) {
     console.error("Question generation error:", error);
     res.status(500).json({
       success: false,
-      error: "Failed to generate questions. Please try again."
+      error: error.message || "Failed to generate questions. Please try again."
     });
   }
 }
