@@ -46,15 +46,15 @@ Return ONLY valid JSON in this exact format:
       messages: [
         {
           role: "system",
-          content: `You are a ${testType} test prep expert. Generate ${subject} questions. Return valid JSON only.`
+          content: `You are a ${testType} test prep expert. Generate ${subject} questions. Return valid JSON only. Be concise but accurate.`
         },
         {
           role: "user",
           content: prompt
         }
       ],
-      temperature: 0.3,
-      max_tokens: 2000,
+      temperature: 0.2,
+      max_tokens: Math.min(3000, numQuestions * 200), // Dynamic token limit based on question count
       stream: false
     });
 
