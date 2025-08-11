@@ -432,7 +432,7 @@ npm install
 ```
 
 #### 2. Environment Configuration
-Create a `.env` file in the project root:
+Copy `.env.example` to `.env` in the project root and fill in your keys:
 ```env
 # Together AI Configuration
 TOGETHER_API_KEY=your_together_ai_api_key_here
