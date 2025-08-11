@@ -118,6 +118,7 @@ export default function Practice() {
   const [selectedAnswers, setSelectedAnswers] = useState({});
   const [showResults, setShowResults] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [error, setError] = useState("");
 
   const availableSubjects = testType ? TEST_SUBJECTS[testType] || [] : [];
   const availableTopics = subject ? TOPIC_OPTIONS[subject] || [] : [];
