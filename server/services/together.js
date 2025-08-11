@@ -5,35 +5,26 @@ const together = new Together({
 });
 
 export async function generateQuestions(testType, subject, topic, numQuestions) {
-  const topicText = topic ? ` focusing on ${topic}` : "";
+  // Verify API key exists
+  if (!process.env.TOGETHER_API_KEY) {
+    throw new Error("TOGETHER_API_KEY environment variable is not set");
+  }
 
+  const topicText = topic ? ` focusing on ${topic}` : "";
   console.log(`🤖 Generating ${numQuestions} AI questions for: ${testType} ${subject}${topicText}`);
 
-  const prompt = `Generate ${numQuestions} multiple choice questions for ${testType} ${subject}${topicText}.
+  // Streamlined prompt for faster generation
+  const prompt = `Generate ${numQuestions} ${testType} ${subject}${topicText} multiple choice questions.
 
-CRITICAL REQUIREMENTS:
-- Questions MUST be appropriate for ${testType} ${subject} level - no basic algebra for advanced topics
-- Use simple math notation: x^2, (a/b), sqrt(x) instead of complex LaTeX
-- If using LaTeX in JSON, use double backslashes: \\\\frac{a}{b}
-- 4 answer choices each
-- Mix of difficulty levels (Easy, Medium, Hard)
-- Detailed explanations (3-5 sentences)
-- Test-specific content that matches ${testType} standards
+Requirements:
+- ${testType} level appropriate questions
+- 4 choices each (A, B, C, D)
+- Include detailed explanations
+- Use simple math notation (avoid complex LaTeX)
+${testType === "AP Exams" ? `- College-level ${subject} content` : ""}
 
-${testType === "AP Exams" ? `IMPORTANT: This is AP level - questions must be college-level for ${subject}. Use advanced concepts appropriate for AP ${subject} exams.` : ""}
-
-Return ONLY valid JSON:
-{
-  "questions": [
-    {
-      "question": "Question text",
-      "choices": ["A", "B", "C", "D"],
-      "correct_answer": 0,
-      "explanation": "Detailed explanation",
-      "difficulty": "Medium"
-    }
-  ]
-}`;
+JSON format only:
+{"questions": [{"question": "text", "choices": ["A", "B", "C", "D"], "correct_answer": 0, "explanation": "text", "difficulty": "Medium"}]}`;
 
   try {
     const completion = await together.chat.completions.create({
