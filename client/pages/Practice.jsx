@@ -148,10 +148,8 @@ export default function Practice() {
 
       clearTimeout(timeoutId);
 
-      // Read the response body only once
-      const data = await response.json();
-
       if (response.ok) {
+        const data = await response.json();
         if (data.questions && data.questions.length > 0) {
           setQuestions(data.questions);
           setCurrentQuestion(0);
@@ -162,7 +160,16 @@ export default function Practice() {
           setError("No questions were generated. Please try again.");
         }
       } else {
-        setError(data.error || "Failed to generate questions. Please try again.");
+        // Handle error responses safely
+        let errorMessage = "Failed to generate questions. Please try again.";
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.error || errorMessage;
+        } catch (jsonError) {
+          // If JSON parsing fails, use status text or default message
+          errorMessage = response.statusText || errorMessage;
+        }
+        setError(errorMessage);
       }
     } catch (error) {
       if (error.name === 'AbortError') {
