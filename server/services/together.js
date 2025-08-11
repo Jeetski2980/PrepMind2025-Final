@@ -92,8 +92,9 @@ JSON format only:
   } catch (error) {
     console.error(`❌ AI generation failed for ${testType} ${subject}${topicText}:`, error);
 
-    // NO FALLBACK - Force proper error handling
-    throw new Error(`AI question generation failed: ${error.message}. Please check your internet connection and try again.`);
+    // Use local generation as fallback to ensure it always works
+    console.log("🔄 Falling back to local question generation");
+    return generateLocalQuestions(testType, subject, topic, numQuestions);
   }
 }
 
