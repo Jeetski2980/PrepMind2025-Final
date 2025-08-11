@@ -130,9 +130,9 @@ export default function Practice() {
     setError("");
 
     try {
-      // Add timeout for faster response
+      // Add timeout with longer duration for AI generation
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 6000); // 6 second timeout
+      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
 
       const response = await fetch('/api/generate-questions', {
         method: 'POST',
