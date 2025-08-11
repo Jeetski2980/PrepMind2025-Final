@@ -13,18 +13,32 @@ export async function generateQuestions(testType, subject, topic, numQuestions) 
     throw new Error("TOGETHER_API_KEY environment variable is not set");
   }
 
-  // Streamlined prompt for faster generation
-  const prompt = `Generate ${numQuestions} ${testType} ${subject}${topicText} multiple choice questions.
+  // Optimized prompt for high-quality question generation
+  const prompt = `Create ${numQuestions} multiple choice questions for ${testType} ${subject}${topicText}.
 
-Requirements:
-- ${testType} level appropriate questions
-- 4 choices each (A, B, C, D)
-- Include detailed explanations
-- Use simple math notation (avoid complex LaTeX)
-${testType === "AP Exams" ? `- College-level ${subject} content` : ""}
+CRITICAL REQUIREMENTS:
+- Questions must be appropriate for ${testType} ${subject} level
+- Exactly 4 answer choices labeled A, B, C, D
+- One correct answer (index 0-3)
+- Detailed explanations (3-4 sentences)
+- Mix of difficulties: Easy, Medium, Hard
+- Use proper academic language
+- For math: use simple notation like x^2, (a/b), sqrt(x)
+${testType === "AP Exams" ? `- Generate college-level ${subject} questions with advanced concepts` : ""}
+${topic ? `- Focus specifically on ${topic} concepts and problems` : ""}
 
-JSON format only:
-{"questions": [{"question": "text", "choices": ["A", "B", "C", "D"], "correct_answer": 0, "explanation": "text", "difficulty": "Medium"}]}`;
+Return ONLY valid JSON in this exact format:
+{
+  "questions": [
+    {
+      "question": "Question text here",
+      "choices": ["Choice A", "Choice B", "Choice C", "Choice D"],
+      "correct_answer": 0,
+      "explanation": "Detailed explanation here",
+      "difficulty": "Medium"
+    }
+  ]
+}`;
 
   try {
     const completion = await together.chat.completions.create({
