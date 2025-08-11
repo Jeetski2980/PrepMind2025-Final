@@ -131,15 +131,16 @@ Keep responses 2-3 paragraphs with proper math formatting.`;
       messages: [
         {
           role: "system",
-          content: "You are PrepMind's AI tutor. Help students with test preparation in a clear, encouraging way."
+          content: "You are PrepMind's AI tutor. Help students with test preparation using proper formatting for math and step-by-step solutions."
         },
         {
           role: "user",
           content: prompt
         }
       ],
-      temperature: 0.8,
-      max_tokens: 800
+      temperature: 0.7,
+      max_tokens: 1000,
+      stream: false
     });
 
     const response = completion.choices[0]?.message?.content;
