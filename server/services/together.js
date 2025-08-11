@@ -17,10 +17,11 @@ export async function generateQuestions(testType, subject, topic, numQuestions) 
   const prompt = `Create ${numQuestions} multiple choice questions for ${testType} ${subject}${topicText}.
 
 CRITICAL REQUIREMENTS:
+- All questions must be UNIQUE within this batch — do not repeat or rephrase any question from the provided exclude list.
 - Questions must be appropriate for ${testType} ${subject} level
 - Exactly 4 answer choices labeled A, B, C, D
 - One correct answer (index 0-3)
-- Detailed explanations (3-4 sentences)
+- Detailed explanations (3-5 sentences)
 - Mix of difficulties: Easy, Medium, Hard
 - Use proper academic language
 - For math: use simple notation like x^2, (a/b), sqrt(x)
