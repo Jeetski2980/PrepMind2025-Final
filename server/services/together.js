@@ -86,70 +86,10 @@ JSON format only:
     })).slice(0, numQuestions);
 
   } catch (error) {
-    console.error(`AI generation failed for ${testType} ${subject}${topicText}:`, error);
+    console.error(`❌ AI generation failed for ${testType} ${subject}${topicText}:`, error);
 
-    // Try one more time with simpler prompt if first attempt failed
-    if (!error.message.includes("retry")) {
-      console.log("Retrying with simplified prompt...");
-      try {
-        const simplePrompt = `Create ${numQuestions} ${testType} ${subject}${topicText} practice questions. Use simple math notation (x^2, not LaTeX). Return valid JSON only:
-{
-  "questions": [
-    {
-      "question": "Question text",
-      "choices": ["A", "B", "C", "D"],
-      "correct_answer": 0,
-      "explanation": "Why this is correct",
-      "difficulty": "Medium"
-    }
-  ]
-}`;
-
-        const retryCompletion = await together.chat.completions.create({
-          model: "meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo",
-          messages: [
-            {
-              role: "system",
-              content: `Expert ${testType} tutor. Generate ${subject} questions. JSON only.`
-            },
-            {
-              role: "user",
-              content: simplePrompt
-            }
-          ],
-          temperature: 0.5,
-          max_tokens: 3000
-        });
-
-        const retryResponse = retryCompletion.choices[0]?.message?.content?.trim();
-        if (retryResponse) {
-          let retryJson = retryResponse;
-          if (retryJson.includes("```")) {
-            retryJson = retryJson.replace(/```json\n?/, "").replace(/```\n?/, "").replace(/\n?```$/, "");
-          }
-
-          const retryData = JSON.parse(retryJson);
-          const retryQuestions = retryData.questions || [];
-
-          if (retryQuestions.length > 0) {
-            console.log(`✅ Retry successful: generated ${retryQuestions.length} AI questions for ${testType} ${subject}${topicText}`);
-            return retryQuestions.map((q, index) => ({
-              id: index + 1,
-              question: q.question || "Question unavailable",
-              choices: Array.isArray(q.choices) ? q.choices.slice(0, 4) : ["A", "B", "C", "D"],
-              correct_answer: typeof q.correct_answer === "number" ? Math.min(3, Math.max(0, q.correct_answer)) : 0,
-              explanation: q.explanation || "Explanation unavailable",
-              difficulty: q.difficulty || "Medium"
-            })).slice(0, numQuestions);
-          }
-        }
-      } catch (retryError) {
-        console.error("Retry also failed:", retryError);
-      }
-    }
-
-    console.warn(`⚠️  FALLING BACK to hardcoded questions for ${testType} ${subject}${topicText} - AI generation failed`);
-    return createFallbackQuestions(testType, subject, numQuestions);
+    // NO FALLBACK - Force proper error handling
+    throw new Error(`AI question generation failed: ${error.message}. Please check your internet connection and try again.`);
   }
 }
 
