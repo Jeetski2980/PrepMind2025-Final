@@ -173,9 +173,11 @@ export default function Practice() {
       }
     } catch (error) {
       if (error.name === 'AbortError') {
-        setError("Request timed out. Please try again with fewer questions.");
+        setError("AI generation is taking longer than expected. Please try again or reduce the number of questions.");
+      } else if (error.message.includes('Failed to fetch')) {
+        setError("Network error. Please check your connection and try again.");
       } else {
-        setError("Error generating questions. Please check your connection and try again.");
+        setError("Error generating questions. Please try again.");
       }
       console.error('Error generating questions:', error);
     }
