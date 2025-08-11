@@ -5,6 +5,9 @@ const together = new Together({
 });
 
 export async function generateQuestions(testType, subject, topic, numQuestions) {
+  if (!process.env.TOGETHER_API_KEY) {
+    throw new Error("TOGETHER_API_KEY is not set");
+  }
   const topicText = topic ? ` focusing on ${topic}` : "";
 
   console.log(`🤖 Generating ${numQuestions} AI questions for: ${testType} ${subject}${topicText}`);
@@ -216,6 +219,7 @@ Keep responses 2-3 paragraphs with proper math formatting.`;
   }
 }
 
+
 // Simple fallback questions when AI fails
 function createFallbackQuestions(testType, subject, numQuestions) {
   const mathQuestions = [
@@ -225,7 +229,7 @@ function createFallbackQuestions(testType, subject, numQuestions) {
       choices: ["x = 5", "x = 7", "x = 15", "x = 29"],
       correct_answer: 0,
       explanation: "To solve this linear equation, we need to isolate the variable x. First, subtract 7 from both sides: 3x + 7 - 7 = 22 - 7, which gives us 3x = 15. Next, divide both sides by 3 to get x = 5. We can verify this by substituting back: 3(5) + 7 = 15 + 7 = 22. This type of algebraic manipulation is fundamental for SAT math problems.",
-      difficulty: "Easy"
+      difficulty: "Easy",
     },
     {
       id: 2,
@@ -233,8 +237,24 @@ function createFallbackQuestions(testType, subject, numQuestions) {
       choices: ["2", "4", "8", "1/2"],
       correct_answer: 0,
       explanation: "The slope between two points is calculated using the formula: slope = (y₂ - y₁)/(x₂ - x₁). Substituting our points (2, 5) and (6, 13): slope = (13 - 5)/(6 - 2) = 8/4 = 2. This means for every 1 unit increase in x, y increases by 2 units. Understanding slope is crucial for coordinate geometry questions on standardized tests.",
-      difficulty: "Medium"
-    }
+      difficulty: "Medium",
+    },
+    {
+      id: 3,
+      question: "Solve the inequality 2x - 5 > 9.",
+      choices: ["x > 7", "x > 2", "x > -7", "x > 5"],
+      correct_answer: 0,
+      explanation: "Add 5 to both sides to get 2x > 14, then divide by 2 to find x > 7. Dividing by a positive number keeps the inequality direction the same.",
+      difficulty: "Easy",
+    },
+    {
+      id: 4,
+      question: "A right triangle has legs of length 3 and 4. What is the length of the hypotenuse?",
+      choices: ["5", "7", "9", "25"],
+      correct_answer: 0,
+      explanation: "Use the Pythagorean theorem: 3^2 + 4^2 = 9 + 16 = 25, so the hypotenuse is 5.",
+      difficulty: "Easy",
+    },
   ];
 
   const readingQuestions = [
@@ -244,8 +264,24 @@ function createFallbackQuestions(testType, subject, numQuestions) {
       choices: ["intentional", "slow", "careful", "thoughtful"],
       correct_answer: 0,
       explanation: "The word 'deliberate' as an adjective means intentional, carefully planned, or done on purpose. It comes from the Latin 'deliberatus' meaning 'weighed' or 'considered carefully'. In test contexts, 'deliberate' often contrasts with accidental or spontaneous actions. When you see this word on reading comprehension passages, it usually suggests that someone made a conscious, thoughtful decision.",
-      difficulty: "Medium"
-    }
+      difficulty: "Medium",
+    },
+    {
+      id: 2,
+      question: "The word 'ephemeral' most nearly means:",
+      choices: ["lasting", "temporary", "joyful", "mysterious"],
+      correct_answer: 1,
+      explanation: "'Ephemeral' describes something that lasts for a very short time. It comes from Greek roots meaning 'lasting only a day'.",
+      difficulty: "Medium",
+    },
+    {
+      id: 3,
+      question: "The author's tone in a passage described as 'skeptical' is best characterized as:",
+      choices: ["doubtful", "enthusiastic", "confused", "neutral"],
+      correct_answer: 0,
+      explanation: "A skeptical tone shows doubt about the subject. Authors using this tone often question or challenge the ideas presented.",
+      difficulty: "Easy",
+    },
   ];
 
   let questions = mathQuestions;
@@ -253,11 +289,16 @@ function createFallbackQuestions(testType, subject, numQuestions) {
     questions = readingQuestions;
   }
 
-  // Repeat questions to match requested number
+  // Randomly select questions to match requested number
   const result = [];
-  for (let i = 0; i < numQuestions; i++) {
-    const q = questions[i % questions.length];
-    result.push({ ...q, id: i + 1 });
+  const pool = [...questions];
+  while (result.length < numQuestions) {
+    if (pool.length === 0) {
+      pool.push(...questions);
+    }
+    const idx = Math.floor(Math.random() * pool.length);
+    const [q] = pool.splice(idx, 1);
+    result.push({ ...q, id: result.length + 1 });
   }
 
   return result;
