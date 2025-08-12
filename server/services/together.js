@@ -6,13 +6,36 @@ const together = new Together({
 
 // ----------------- HELPERS -----------------
 
-// Remove duplicate questions
+// Remove exact duplicate questions
 function removeDuplicates(questions) {
   const seen = new Set();
   return questions.filter(q => {
     const key = q.question.toLowerCase().trim();
     if (seen.has(key)) return false;
     seen.add(key);
+    return true;
+  });
+}
+
+// Remove near-duplicate questions (same equation or concept pattern)
+function removeNearDuplicates(questions) {
+  const seenKeys = new Set();
+  return questions.filter(q => {
+    // Detect equation patterns
+    const equationMatch = q.question.match(/([A-Z][a-z]?\s*\d*\s*\+\s*[A-Z][a-z]?\s*\d*)/g);
+    const eqKey = equationMatch ? equationMatch.sort().join(" + ").toLowerCase() : "";
+
+    // Detect concept keywords
+    const keywords = q.question.toLowerCase()
+      .replace(/[^a-z\s]/g, "")
+      .split(/\s+/)
+      .filter(word => word.length > 3)
+      .slice(0, 4) // first few keywords
+      .join(" ");
+
+    const key = eqKey || keywords;
+    if (seenKeys.has(key)) return false;
+    seenKeys.add(key);
     return true;
   });
 }
@@ -57,11 +80,13 @@ export async function generateQuestions(testType, subject, topic, numQuestions) 
   const prompt = `Create ${numQuestions} multiple choice questions for ${testType} ${subject}${topicText}.
 
 CRITICAL REQUIREMENTS:
-- DO NOT repeat any event, fact, or concept in this set.
-  Before writing each question, check against all earlier questions to ensure 100% uniqueness.
+- Absolutely NO two questions in this set may be based on the same reaction equation, same variable names, or same general formula (e.g., "A + B → C + D" or "2A + B → 2C + D").
+- No two questions may have explanations that follow the same sentence template structure.
+- Do not include pairs of directly opposite questions (e.g., exothermic vs. endothermic ΔH) in the same set.
+- Do not reword or rename the same concept (e.g., "oxidation-reduction" and "redox") as separate questions — these count as duplicates.
+- Every question must be about a unique reaction, concept, or calculation.
 - Each explanation MUST be exactly between 3 and 5 full sentences.
   If shorter or longer, rewrite until it fits this length and is factually correct.
-- Each question must test a different historical event, math problem, passage, or concept.
 - Do not paraphrase or reword a question to make it appear different.
 - Questions must be appropriate for ${testType} ${subject} level.
 - Exactly 4 answer choices labeled A, B, C, D.
@@ -73,7 +98,7 @@ ${testType === "AP Exams" ? `- Generate college-level ${subject} questions with 
 ${topic ? `- Focus specifically on ${topic} concepts and problems.` : ""}
 
 After generating all questions:
-- Scan the set to ensure there are NO duplicates.
+- Scan the set to ensure there are NO duplicates or near-duplicates.
 - Confirm every explanation is 3–5 sentences.
 - Fix any issues before returning.
 
@@ -136,8 +161,9 @@ Return ONLY valid JSON in this exact format:
 
       if (questions.length === 0) throw new Error("Empty questions array");
 
-      // Remove duplicates
+      // Remove exact & near duplicates
       questions = removeDuplicates(questions);
+      questions = removeNearDuplicates(questions);
 
       // Fix explanations if needed
       for (let i = 0; i < questions.length; i++) {
