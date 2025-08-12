@@ -15,37 +15,48 @@ function removeDuplicates(questions) {
   });
 }
 
-// Helper: Enforce explanation length
-function enforceExplanationLength(questions) {
-  return questions.map(q => {
-    let sentences = q.explanation
-      ? q.explanation.split(/(?<=[.!?])\s+/).filter(s => s.trim().length > 0)
-      : [];
+// Helper: Count sentences in an explanation
+function sentenceCount(text) {
+  return text
+    ? text.split(/(?<=[.!?])\s+/).filter(s => s.trim().length > 0).length
+    : 0;
+}
 
-    if (sentences.length < 3 || sentences.length > 5) {
-      q.explanation = "This explanation has been adjusted to be between 3 and 5 sentences for clarity.";
-    }
-    return q;
+// Helper: Ask AI to fix bad explanations
+async function fixExplanation(question, correctAnswer, difficulty) {
+  const fixPrompt = `The following question needs a correct explanation in exactly 3–5 sentences:
+
+Question: ${question}
+Correct Answer: ${correctAnswer}
+Difficulty: ${difficulty}
+
+Provide a correct, factual, detailed explanation between 3 and 5 complete sentences. Do not use bullet points.`;
+
+  const completion = await together.chat.completions.create({
+    model: "meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo",
+    messages: [{ role: "user", content: fixPrompt }],
+    temperature: 0.3,
+    max_tokens: 300
   });
+
+  return completion.choices[0]?.message?.content?.trim() || "Explanation not available";
 }
 
 export async function generateQuestions(testType, subject, topic, numQuestions) {
   const topicText = topic ? ` focusing on ${topic}` : "";
   console.log(`🤖 Generating ${numQuestions} AI questions for: ${testType} ${subject}${topicText}`);
 
-  // Verify API key exists
   if (!process.env.TOGETHER_API_KEY) {
     throw new Error("TOGETHER_API_KEY environment variable is not set");
   }
 
-  // Optimized prompt for high-quality question generation
   const prompt = `Create ${numQuestions} multiple choice questions for ${testType} ${subject}${topicText}.
 
 CRITICAL REQUIREMENTS:
 - DO NOT repeat any event, fact, or concept in this set.
   Before writing each question, check against all earlier questions to ensure 100% uniqueness.
-- Each explanation MUST be between exactly 3 and 5 full sentences.
-  If shorter or longer, rewrite until it fits this length.
+- Each explanation MUST be exactly between 3 and 5 full sentences.
+  If shorter or longer, rewrite until it fits this length and is factually correct.
 - Each question must test a different historical event, math problem, passage, or concept.
 - Do not paraphrase or reword a question to make it appear different.
 - Questions must be appropriate for ${testType} ${subject} level.
@@ -89,7 +100,7 @@ Return ONLY valid JSON in this exact format:
         }
       ],
       temperature: 0.2,
-      max_tokens: Math.min(3000, numQuestions * 200), // Dynamic token limit based on question count
+      max_tokens: Math.min(3000, numQuestions * 200),
       stream: false
     });
 
@@ -98,7 +109,6 @@ Return ONLY valid JSON in this exact format:
       throw new Error("No response from AI - API call failed");
     }
 
-    // Clean and parse JSON response
     let jsonText = response.trim();
     if (jsonText.includes("```")) {
       jsonText = jsonText.replace(/```json\n?/g, "").replace(/```\n?/g, "").replace(/\n?```$/g, "");
@@ -118,9 +128,20 @@ Return ONLY valid JSON in this exact format:
       throw new Error("AI returned empty questions array");
     }
 
-    // Post-processing
+    // Step 1: Remove duplicates
     questions = removeDuplicates(questions);
-    questions = enforceExplanationLength(questions);
+
+    // Step 2: Fix bad explanations
+    for (let i = 0; i < questions.length; i++) {
+      if (sentenceCount(questions[i].explanation) < 3 || sentenceCount(questions[i].explanation) > 5) {
+        console.log(`🔄 Fixing explanation for Question ${i + 1}...`);
+        questions[i].explanation = await fixExplanation(
+          questions[i].question,
+          Array.isArray(questions[i].choices) ? questions[i].choices[questions[i].correct_answer] : "",
+          questions[i].difficulty || "Medium"
+        );
+      }
+    }
 
     console.log(`✅ Successfully generated ${questions.length} AI questions for ${testType} ${subject}${topicText}`);
 
