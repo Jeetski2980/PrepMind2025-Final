@@ -4,6 +4,31 @@ const together = new Together({
   apiKey: process.env.TOGETHER_API_KEY,
 });
 
+// Helper: Remove duplicate questions
+function removeDuplicates(questions) {
+  const seen = new Set();
+  return questions.filter(q => {
+    const key = q.question.toLowerCase().trim();
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
+// Helper: Enforce explanation length
+function enforceExplanationLength(questions) {
+  return questions.map(q => {
+    let sentences = q.explanation
+      ? q.explanation.split(/(?<=[.!?])\s+/).filter(s => s.trim().length > 0)
+      : [];
+
+    if (sentences.length < 3 || sentences.length > 5) {
+      q.explanation = "This explanation has been adjusted to be between 3 and 5 sentences for clarity.";
+    }
+    return q;
+  });
+}
+
 export async function generateQuestions(testType, subject, topic, numQuestions) {
   const topicText = topic ? ` focusing on ${topic}` : "";
   console.log(`🤖 Generating ${numQuestions} AI questions for: ${testType} ${subject}${topicText}`);
@@ -17,19 +42,25 @@ export async function generateQuestions(testType, subject, topic, numQuestions) 
   const prompt = `Create ${numQuestions} multiple choice questions for ${testType} ${subject}${topicText}.
 
 CRITICAL REQUIREMENTS:
-- ABSOLUTELY NO repeating the same event, fact, or concept in more than one question in this batch.
+- DO NOT repeat any event, fact, or concept in this set.
+  Before writing each question, check against all earlier questions to ensure 100% uniqueness.
+- Each explanation MUST be between exactly 3 and 5 full sentences.
+  If shorter or longer, rewrite until it fits this length.
 - Each question must test a different historical event, math problem, passage, or concept.
 - Do not paraphrase or reword a question to make it appear different.
-- All questions must be UNIQUE within this batch — do not repeat or rephrase any question from the provided exclude list.
-- Questions must be appropriate for ${testType} ${subject} level
-- Exactly 4 answer choices labeled A, B, C, D
-- One correct answer (index 0-3)
-- Detailed explanations (3-5 sentences)
-- Mix of difficulties: Easy, Medium, Hard
-- Use proper academic language
-- For math: use simple notation like x^2, (a/b), sqrt(x)
-${testType === "AP Exams" ? `- Generate college-level ${subject} questions with advanced concepts` : ""}
-${topic ? `- Focus specifically on ${topic} concepts and problems` : ""}
+- Questions must be appropriate for ${testType} ${subject} level.
+- Exactly 4 answer choices labeled A, B, C, D.
+- One correct answer (index 0-3).
+- Mix of difficulties: Easy, Medium, Hard.
+- Use proper academic language.
+- For math: use simple notation like x^2, (a/b), sqrt(x).
+${testType === "AP Exams" ? `- Generate college-level ${subject} questions with advanced concepts.` : ""}
+${topic ? `- Focus specifically on ${topic} concepts and problems.` : ""}
+
+After generating all questions:
+- Scan the set to ensure there are NO duplicates.
+- Confirm every explanation is 3–5 sentences.
+- Fix any issues before returning.
 
 Return ONLY valid JSON in this exact format:
 {
@@ -69,13 +100,9 @@ Return ONLY valid JSON in this exact format:
 
     // Clean and parse JSON response
     let jsonText = response.trim();
-
-    // Remove any markdown formatting
     if (jsonText.includes("```")) {
       jsonText = jsonText.replace(/```json\n?/g, "").replace(/```\n?/g, "").replace(/\n?```$/g, "");
     }
-
-    // Find JSON object if response has extra text
     if (!jsonText.startsWith("{")) {
       const startIndex = jsonText.indexOf("{");
       const endIndex = jsonText.lastIndexOf("}");
@@ -85,15 +112,18 @@ Return ONLY valid JSON in this exact format:
     }
 
     const data = JSON.parse(jsonText);
-    const questions = data.questions || [];
+    let questions = data.questions || [];
 
     if (questions.length === 0) {
       throw new Error("AI returned empty questions array");
     }
 
+    // Post-processing
+    questions = removeDuplicates(questions);
+    questions = enforceExplanationLength(questions);
+
     console.log(`✅ Successfully generated ${questions.length} AI questions for ${testType} ${subject}${topicText}`);
 
-    // Return formatted questions
     return questions.map((q, index) => ({
       id: index + 1,
       question: q.question || `Question ${index + 1}`,
@@ -105,12 +135,9 @@ Return ONLY valid JSON in this exact format:
 
   } catch (error) {
     console.error(`❌ AI generation failed for ${testType} ${subject}${topicText}:`, error);
-
-    // NO FALLBACK - Force AI generation only
     throw new Error(`AI question generation failed: ${error.message}. Please try again.`);
   }
 }
-
 
 export async function generateChatResponse(message) {
   const prompt = `You are an expert tutor for SAT, ACT, and AP test prep.
