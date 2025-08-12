@@ -4,7 +4,9 @@ const together = new Together({
   apiKey: process.env.TOGETHER_API_KEY,
 });
 
-// Helper: Remove duplicate questions
+// ----------------- HELPERS -----------------
+
+// Remove duplicate questions
 function removeDuplicates(questions) {
   const seen = new Set();
   return questions.filter(q => {
@@ -15,14 +17,14 @@ function removeDuplicates(questions) {
   });
 }
 
-// Helper: Count sentences in an explanation
+// Count number of sentences in an explanation
 function sentenceCount(text) {
   return text
     ? text.split(/(?<=[.!?])\s+/).filter(s => s.trim().length > 0).length
     : 0;
 }
 
-// Helper: Ask AI to fix bad explanations
+// Ask AI to rewrite/fix an explanation
 async function fixExplanation(question, correctAnswer, difficulty) {
   const fixPrompt = `The following question needs a correct explanation in exactly 3–5 sentences:
 
@@ -41,6 +43,8 @@ Provide a correct, factual, detailed explanation between 3 and 5 complete senten
 
   return completion.choices[0]?.message?.content?.trim() || "Explanation not available";
 }
+
+// ----------------- MAIN FUNCTION -----------------
 
 export async function generateQuestions(testType, subject, topic, numQuestions) {
   const topicText = topic ? ` focusing on ${topic}` : "";
@@ -86,79 +90,88 @@ Return ONLY valid JSON in this exact format:
   ]
 }`;
 
-  try {
-    const completion = await together.chat.completions.create({
-      model: "meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo",
-      messages: [
-        {
-          role: "system",
-          content: `You are a ${testType} test prep expert. Generate ${subject} questions. Return valid JSON only. Be concise but accurate.`
-        },
-        {
-          role: "user",
-          content: prompt
+  // Retry logic
+  let attempt = 0;
+  let questions = [];
+
+  while (attempt < 3 && questions.length === 0) {
+    attempt++;
+    console.log(`🔄 Attempt ${attempt} to generate questions...`);
+
+    try {
+      const completion = await together.chat.completions.create({
+        model: "meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo",
+        messages: [
+          {
+            role: "system",
+            content: `You are a ${testType} test prep expert. Generate ${subject} questions. Return valid JSON only. Be concise but accurate.`
+          },
+          {
+            role: "user",
+            content: prompt
+          }
+        ],
+        temperature: 0.2,
+        max_tokens: Math.min(3000, numQuestions * 200),
+        stream: false
+      });
+
+      const response = completion.choices[0]?.message?.content;
+      if (!response) throw new Error("No response from AI - API call failed");
+
+      let jsonText = response.trim();
+      if (jsonText.includes("```")) {
+        jsonText = jsonText.replace(/```json\n?/g, "").replace(/```\n?/g, "").replace(/\n?```$/g, "");
+      }
+      if (!jsonText.startsWith("{")) {
+        const startIndex = jsonText.indexOf("{");
+        const endIndex = jsonText.lastIndexOf("}");
+        if (startIndex !== -1 && endIndex !== -1) {
+          jsonText = jsonText.substring(startIndex, endIndex + 1);
         }
-      ],
-      temperature: 0.2,
-      max_tokens: Math.min(3000, numQuestions * 200),
-      stream: false
-    });
+      }
 
-    const response = completion.choices[0]?.message?.content;
-    if (!response) {
-      throw new Error("No response from AI - API call failed");
-    }
+      const data = JSON.parse(jsonText);
+      questions = data.questions || [];
 
-    let jsonText = response.trim();
-    if (jsonText.includes("```")) {
-      jsonText = jsonText.replace(/```json\n?/g, "").replace(/```\n?/g, "").replace(/\n?```$/g, "");
-    }
-    if (!jsonText.startsWith("{")) {
-      const startIndex = jsonText.indexOf("{");
-      const endIndex = jsonText.lastIndexOf("}");
-      if (startIndex !== -1 && endIndex !== -1) {
-        jsonText = jsonText.substring(startIndex, endIndex + 1);
+      if (questions.length === 0) throw new Error("Empty questions array");
+
+      // Remove duplicates
+      questions = removeDuplicates(questions);
+
+      // Fix explanations if needed
+      for (let i = 0; i < questions.length; i++) {
+        if (sentenceCount(questions[i].explanation) < 3 || sentenceCount(questions[i].explanation) > 5) {
+          console.log(`🔄 Fixing explanation for Question ${i + 1}...`);
+          questions[i].explanation = await fixExplanation(
+            questions[i].question,
+            Array.isArray(questions[i].choices) ? questions[i].choices[questions[i].correct_answer] : "",
+            questions[i].difficulty || "Medium"
+          );
+        }
+      }
+
+    } catch (err) {
+      console.warn(`⚠️ Attempt ${attempt} failed: ${err.message}`);
+      if (attempt >= 3) {
+        throw new Error(`AI question generation failed after ${attempt} attempts: ${err.message}`);
       }
     }
-
-    const data = JSON.parse(jsonText);
-    let questions = data.questions || [];
-
-    if (questions.length === 0) {
-      throw new Error("AI returned empty questions array");
-    }
-
-    // Step 1: Remove duplicates
-    questions = removeDuplicates(questions);
-
-    // Step 2: Fix bad explanations
-    for (let i = 0; i < questions.length; i++) {
-      if (sentenceCount(questions[i].explanation) < 3 || sentenceCount(questions[i].explanation) > 5) {
-        console.log(`🔄 Fixing explanation for Question ${i + 1}...`);
-        questions[i].explanation = await fixExplanation(
-          questions[i].question,
-          Array.isArray(questions[i].choices) ? questions[i].choices[questions[i].correct_answer] : "",
-          questions[i].difficulty || "Medium"
-        );
-      }
-    }
-
-    console.log(`✅ Successfully generated ${questions.length} AI questions for ${testType} ${subject}${topicText}`);
-
-    return questions.map((q, index) => ({
-      id: index + 1,
-      question: q.question || `Question ${index + 1}`,
-      choices: Array.isArray(q.choices) ? q.choices.slice(0, 4) : ["A", "B", "C", "D"],
-      correct_answer: typeof q.correct_answer === "number" ? Math.min(3, Math.max(0, q.correct_answer)) : 0,
-      explanation: q.explanation || "Explanation not available",
-      difficulty: q.difficulty || "Medium"
-    })).slice(0, numQuestions);
-
-  } catch (error) {
-    console.error(`❌ AI generation failed for ${testType} ${subject}${topicText}:`, error);
-    throw new Error(`AI question generation failed: ${error.message}. Please try again.`);
   }
+
+  console.log(`✅ Successfully generated ${questions.length} AI questions after ${attempt} attempt(s)`);
+
+  return questions.map((q, index) => ({
+    id: index + 1,
+    question: q.question || `Question ${index + 1}`,
+    choices: Array.isArray(q.choices) ? q.choices.slice(0, 4) : ["A", "B", "C", "D"],
+    correct_answer: typeof q.correct_answer === "number" ? Math.min(3, Math.max(0, q.correct_answer)) : 0,
+    explanation: q.explanation || "Explanation not available",
+    difficulty: q.difficulty || "Medium"
+  })).slice(0, numQuestions);
 }
+
+// ----------------- CHAT FUNCTION -----------------
 
 export async function generateChatResponse(message) {
   const prompt = `You are an expert tutor for SAT, ACT, and AP test prep.
