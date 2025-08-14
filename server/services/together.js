@@ -1,8 +1,13 @@
 import Together from "together-ai";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
 const together = new Together({
   apiKey: process.env.TOGETHER_API_KEY,
 });
+
+// Google AI for question generation
+const genAI = new GoogleGenerativeAI("AIzaSyAPjLeewXWKgBP-8WZVALK0dJdH02yYnqQ");
+const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
 /* =========================
    Small, cheap helpers
