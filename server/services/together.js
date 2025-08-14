@@ -10,85 +10,8 @@ const genAI = new GoogleGenerativeAI("AIzaSyAPjLeewXWKgBP-8WZVALK0dJdH02yYnqQ");
 const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
 /* =========================
-   Small, cheap helpers
+   Helper functions
 ========================= */
-
-function repairJSON(text) {
-  if (!text) return "{}";
-  let s = text.trim();
-
-  // Remove code fences
-  s = s.replace(/```json\s*|```\s*$/gim, "").trim();
-
-  // Take largest {...} block if extra prose exists
-  const start = s.indexOf("{");
-  const end = s.lastIndexOf("}");
-  if (start !== -1 && end !== -1 && end > start) s = s.slice(start, end + 1);
-
-  // Kill trailing commas
-  s = s.replace(/,\s*([}\]])/g, "$1");
-
-  // Normalize quotes
-  s = s.replace(/[“”]/g, '"');
-
-  return s;
-}
-
-function sentenceSplit(text) {
-  if (!text) return [];
-  return text
-    .split(/(?<=[.!?])\s+/)
-    .map(t => t.trim())
-    .filter(Boolean);
-}
-
-function clampExplanation(q, subjectHint = "") {
-  // Enforce 3–5 sentences without extra API calls.
-  // Strategy: trim if >5; if <3, append brief factual filler that doesn’t change correctness.
-  const sentences = sentenceSplit(q.explanation);
-  if (sentences.length > 5) {
-    q.explanation = sentences.slice(0, 5).join(" ");
-    return q;
-  }
-  if (sentences.length === 0) {
-    const base = `This answer follows standard principles in ${subjectHint || "the subject"}.`;
-    q.explanation = `${base} The reasoning compares definitions and common outcomes. It aligns with typical examples used in exam preparation.`;
-    return q;
-  }
-  if (sentences.length === 1) {
-    sentences.push(
-      "This conclusion matches the core definition and typical scenarios.",
-      "It is consistent with standard exam expectations."
-    );
-  } else if (sentences.length === 2) {
-    sentences.push(
-      "This supports the chosen option with clear justification."
-    );
-  }
-  if (sentences.length > 5) {
-    q.explanation = sentences.slice(0, 5).join(" ");
-  } else {
-    q.explanation = sentences.join(" ");
-  }
-  return q;
-}
-
-function sanitizeQuestion(q, i, subjectHint = "") {
-  const out = {
-    id: i + 1,
-    question: (q.question ?? `Question ${i + 1}`).toString().trim(),
-    choices: Array.isArray(q.choices) && q.choices.length >= 4
-      ? q.choices.slice(0, 4).map(c => (c ?? "").toString())
-      : ["A", "B", "C", "D"],
-    correct_answer:
-      typeof q.correct_answer === "number"
-        ? Math.min(3, Math.max(0, q.correct_answer))
-        : 0,
-    explanation: (q.explanation ?? "").toString().trim(),
-    difficulty: (q.difficulty ?? "Medium").toString().trim(),
-  };
-  return clampExplanation(out, subjectHint);
-}
 
 function dedupeExact(questions) {
   const seen = new Set();
@@ -103,143 +26,141 @@ function dedupeExact(questions) {
 }
 
 /* =========================
-   Single-call generation
+   Google AI Question Generation
 ========================= */
 
 export async function generateQuestions(testType, subject, topic, numQuestions) {
-  if (!process.env.TOGETHER_API_KEY) {
-    // Do not hard-fail; return a tiny placeholder so UI doesn’t break
-    return [
-      {
-        id: 1,
-        question: "Placeholder: What is 2 + 2?",
-        choices: ["3", "4", "5", "6"],
-        correct_answer: 1,
-        explanation:
-          "Adding two and two yields four. This follows basic integer addition. It is a standard arithmetic fact.",
-        difficulty: "Easy",
-      },
-    ];
-  }
-
   const topicText = topic ? ` focusing on ${topic}` : "";
+  console.log(`🤖 Generating ${numQuestions} AI questions for: ${testType} ${subject}${topicText}`);
 
-  // Compact, token-cheap prompt (keeps costs down)
-  const prompt = `Create ${numQuestions} multiple-choice questions for ${testType} ${subject}${topicText}.
-Rules:
-- All questions must be distinct in concept; avoid using the same base example/equation/template repeatedly.
-- Exactly 4 choices (A,B,C,D). Provide zero-based "correct_answer" index (0–3).
-- Explanation must be 3–5 complete sentences and factually correct.
-- Difficulty: Easy, Medium, or Hard.
-Return ONLY JSON:
+  try {
+    // Enhanced prompt for Google AI to ensure diverse, non-repetitive questions
+    const prompt = `Generate exactly ${numQuestions} unique multiple-choice questions for ${testType} ${subject}${topicText}.
+
+CRITICAL REQUIREMENTS:
+- Each question must be completely different in concept, formula, scenario, and approach
+- NO repeated examples, equations, or similar problem types
+- Questions appropriate for ${testType} ${subject} level
+- Exactly 4 answer choices each
+- Provide correct_answer as index 0-3 (zero-based)
+- Each explanation must be exactly 3-5 complete sentences
+- Mix difficulties: Easy, Medium, Hard
+- For math: use simple notation like x^2, (a/b), sqrt(x) - avoid complex LaTeX
+${testType === "AP Exams" ? `- Generate college-level ${subject} questions with advanced concepts` : ""}
+${topic ? `- Focus specifically on ${topic} concepts and problems` : ""}
+
+Return ONLY valid JSON in this exact format:
 {
-  "questions":[
+  "questions": [
     {
-      "question":"...",
-      "choices":["A","B","C","D"],
-      "correct_answer":0,
-      "explanation":"3-5 sentences",
-      "difficulty":"Medium"
+      "question": "Question text here",
+      "choices": ["Choice A", "Choice B", "Choice C", "Choice D"],
+      "correct_answer": 0,
+      "explanation": "Detailed explanation in 3-5 sentences.",
+      "difficulty": "Medium"
     }
   ]
 }`;
 
-  // ONE API CALL (cheap)
-  let content;
-  try {
-    const completion = await together.chat.completions.create({
-      model: "meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo",
-      messages: [{ role: "user", content: prompt }],
-      temperature: 0.2,
-      // Keep max tokens tight to cut cost; ~160 tokens per Q is usually enough
-      max_tokens: Math.min(160 * numQuestions, 2400),
-      stream: false,
-    });
-    content = completion.choices?.[0]?.message?.content?.trim() || "";
-  } catch {
-    // Return a minimal fallback instead of failing
-    return [
-      {
-        id: 1,
-        question: "Fallback: Which option equals 10?",
-        choices: ["3+6", "4+6", "2+7", "8+1"],
-        correct_answer: 1,
-        explanation:
-          "Four plus six equals ten. Addition combines two addends into a sum. This is a standard arithmetic operation.",
-        difficulty: "Easy",
-      },
-    ];
-  }
+    const result = await model.generateContent(prompt);
+    const response = result.response;
+    const content = response.text();
 
-  // JSON repair + parse (no extra calls)
-  let data;
-  try {
-    const repaired = repairJSON(content);
-    data = JSON.parse(repaired);
-  } catch {
-    // Try if model returned an array directly
-    try {
-      const repaired = repairJSON(content);
-      if (repaired.trim().startsWith("[")) {
-        data = { questions: JSON.parse(repaired) };
-      } else {
-        data = { questions: [] };
-      }
-    } catch {
-      data = { questions: [] };
+    // Clean and parse JSON response
+    let jsonText = content.trim();
+    
+    // Remove markdown formatting
+    if (jsonText.includes("```")) {
+      jsonText = jsonText.replace(/```json\n?/g, "").replace(/```\n?/g, "").replace(/\n?```$/g, "");
     }
+    
+    // Find JSON object if response has extra text
+    if (!jsonText.startsWith("{")) {
+      const startIndex = jsonText.indexOf("{");
+      const endIndex = jsonText.lastIndexOf("}");
+      if (startIndex !== -1 && endIndex !== -1) {
+        jsonText = jsonText.substring(startIndex, endIndex + 1);
+      }
+    }
+    
+    const data = JSON.parse(jsonText);
+    const questions = data.questions || [];
+    
+    if (questions.length === 0) {
+      throw new Error("No questions generated by Google AI");
+    }
+
+    console.log(`✅ Successfully generated ${questions.length} AI questions for ${testType} ${subject}${topicText}`);
+
+    // Format and validate questions
+    const formattedQuestions = questions.slice(0, numQuestions).map((q, index) => ({
+      id: index + 1,
+      question: q.question || `Question ${index + 1}`,
+      choices: Array.isArray(q.choices) ? q.choices.slice(0, 4) : ["A", "B", "C", "D"],
+      correct_answer: typeof q.correct_answer === "number" ? Math.min(3, Math.max(0, q.correct_answer)) : 0,
+      explanation: q.explanation || "Explanation not available",
+      difficulty: q.difficulty || "Medium"
+    }));
+
+    // Check for duplicates and ensure we have enough unique questions
+    const uniqueQuestions = dedupeExact(formattedQuestions);
+    
+    if (uniqueQuestions.length < numQuestions) {
+      console.warn(`⚠️ Generated ${uniqueQuestions.length} unique questions, requested ${numQuestions}`);
+    }
+
+    return uniqueQuestions;
+
+  } catch (error) {
+    console.error(`❌ Google AI generation failed for ${testType} ${subject}${topicText}:`, error);
+    throw new Error(`AI question generation failed: ${error.message}. Please try again.`);
   }
-
-  // Extract and sanitize
-  let qs = Array.isArray(data?.questions) ? data.questions : [];
-
-  // Deduplicate exact text only (lightweight to preserve count)
-  qs = dedupeExact(qs);
-
-  // If we got fewer than requested, keep what we have (don’t make extra calls)
-  // Then sanitize and clamp explanations locally
-  const final = qs.slice(0, numQuestions).map((q, i) => sanitizeQuestion(q, i, subject));
-
-  // Ensure we return at least 1 question to avoid UI errors
-  if (final.length === 0) {
-    return [
-      {
-        id: 1,
-        question: "Placeholder: Which is a prime number?",
-        choices: ["9", "10", "11", "12"],
-        correct_answer: 2,
-        explanation:
-          "Eleven is divisible only by one and itself. This satisfies the definition of a prime number. The other options have additional divisors.",
-        difficulty: "Easy",
-      },
-    ];
-  }
-
-  return final;
 }
 
 /* =========================
-   Chat helper (unchanged, cheap)
+   Together AI Chat (unchanged)
 ========================= */
 
 export async function generateChatResponse(message) {
-  // Small prompt to save tokens
-  const prompt = `You are an expert tutor for SAT/ACT/AP.
+  const prompt = `You are an expert tutor for SAT, ACT, and AP test prep.
 
-Question: "${message}"
+Student question: "${message}"
 
-Reply in 2 short paragraphs. Use **bold** for final answers. Use $inline$ for math and $$display$$ for longer equations. Wrap key steps with <highlight>...</highlight>.`;
+Provide a helpful response following these formatting rules:
+- Use **bold text** for final answers and important formulas
+- Use $inline math$ for mathematical expressions (e.g., $x = 5$, $\\frac{a}{b}$)
+- Use $$display math$$ for longer equations (e.g., $$\\int_0^1 x^2 dx$$)
+- For multi-step problems, wrap EACH individual step with <highlight>step explanation here</highlight>
+- For concept explanations, highlight key insights with <highlight>important concept</highlight>
+- Use multiple highlight tags to emphasize different steps and concepts throughout your response
+- Clear explanations with practical study tips
+- Encouraging tone focused on test preparation
+
+Keep responses 2-3 paragraphs with proper math formatting.`;
 
   try {
     const completion = await together.chat.completions.create({
       model: "meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo",
-      messages: [{ role: "user", content: prompt }],
-      temperature: 0.6,
-      max_tokens: 600,
-      stream: false,
+      messages: [
+        {
+          role: "system",
+          content: "You are PrepMind's AI tutor. Help students with test preparation using proper formatting for math and step-by-step solutions."
+        },
+        {
+          role: "user",
+          content: prompt
+        }
+      ],
+      temperature: 0.7,
+      max_tokens: 1000,
+      stream: false
     });
-    return completion.choices?.[0]?.message?.content?.trim() || "Sorry, I couldn't compose a response.";
-  } catch {
-    return "I'm having trouble responding right now. Please try again.";
+
+    const response = completion.choices[0]?.message?.content;
+    return response?.trim() || "Sorry, I'm having trouble responding. Please try again.";
+
+  } catch (error) {
+    console.error("Chat response failed:", error);
+    return "I'm experiencing technical difficulties. Please try again in a moment.";
   }
 }
