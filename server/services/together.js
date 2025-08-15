@@ -1,11 +1,6 @@
 // server/services/together.js
-// SAFE: reads keys from process.env (Render env vars or local .env). Keep this server-only.
-
 import Together from "together-ai";
 import { GoogleGenerativeAI } from "@google/generative-ai";
-
-// If you don't already load dotenv in server/index.js, uncomment the next line for local dev.
-// import "dotenv/config";
 
 function requireEnv(name) {
   const v = process.env[name];
@@ -13,7 +8,7 @@ function requireEnv(name) {
   return v;
 }
 
-// Instantiate clients with server-side secrets
+// Secrets come from Render/GCP env or local .env
 const together = new Together({ apiKey: requireEnv("TOGETHER_API_KEY") });
 const genAI = new GoogleGenerativeAI(requireEnv("GEMINI_API_KEY"));
 const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
@@ -66,7 +61,7 @@ Return ONLY valid JSON in this exact format:
     const result = await model.generateContent(prompt);
     const content = result.response.text().trim();
 
-    // Clean JSON if the model wraps it in code fences or adds prose
+    // Clean JSON if fenced or chatty
     let jsonText = content.replace(/```json\n?|\n?```/g, "");
     if (!jsonText.startsWith("{")) {
       const s = jsonText.indexOf("{");
@@ -118,11 +113,7 @@ Provide a helpful response with:
     const completion = await together.chat.completions.create({
       model: "meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo",
       messages: [
-        {
-          role: "system",
-          content:
-            "You are PrepMind's AI tutor. Give clear, step-by-step explanations with math formatting.",
-        },
+        { role: "system", content: "You are PrepMind's AI tutor. Give clear, step-by-step explanations with math formatting." },
         { role: "user", content: prompt },
       ],
       temperature: 0.7,
