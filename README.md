@@ -779,7 +779,12 @@ echo "GOOGLE_AI_STUDIO_API_KEY=your_google_ai_key_here" >> .env
 npm run dev
 ```
 
+<<<<<<< HEAD
 #### Environment Configuration
+=======
+#### 2. Environment Configuration
+Copy `.env.example` to `.env` in the project root and fill in your keys:
+>>>>>>> 9ea11f7e2021475bd1416f497cd3066da50e58d5
 ```env
 # AI Service Configuration
 TOGETHER_API_KEY=tgp_v1_4IUWK6VL0xtRkws2GESmHCs3duZIA4PQ0pY2zzbPUf4
