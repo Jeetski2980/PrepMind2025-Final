@@ -237,7 +237,7 @@ export default function Practice() {
 
           {questions.length === 0 ? (
             <div>
-              <ApiKeyNotice />
+              <ApiKeyNoticeGoogle />
               
               <Card className="bg-white dark:bg-black border dark:border-white/20">
                 <CardHeader>
