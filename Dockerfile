@@ -2,16 +2,16 @@
 FROM node:20-alpine AS build
 WORKDIR /app
 
-# Copy manifests first for better caching
+# Copy only root manifests first for caching
 COPY package*.json ./
-COPY client/package*.json client/
-COPY server/package*.json server/
 
-# Install deps (root, client, server)
-RUN npm ci && npm --prefix client ci && npm --prefix server ci
+# Install deps (root manages both client & server)
+RUN npm ci
 
-# Copy source and build SPA + server bundle (your root build should do both)
+# Copy the rest of the source
 COPY . .
+
+# Build (your root "build" should build client + server)
 RUN npm run build
 
 # ---- Runtime stage ----
@@ -19,13 +19,13 @@ FROM node:20-alpine
 WORKDIR /app
 ENV NODE_ENV=production
 
-# Install only prod deps for runtime
+# Bring in only what's needed to run
 COPY package*.json ./
 RUN npm ci --omit=dev
 
-# Copy built artifacts
+# Copy built artifacts from the build stage
 COPY --from=build /app/dist ./dist
 
-# Cloud Run sets $PORT; your server must use process.env.PORT
+# Cloud Run will provide $PORT; your server must use process.env.PORT
 EXPOSE 8080
 CMD ["node", "dist/server/node-build.mjs"]
