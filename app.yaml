@@ -1,7 +1,11 @@
 runtime: nodejs20
 
-instance_class: F2  # Optional: choose F1, F2, F4 depending on need
-env: standard       # Use "standard" for basic Node.js apps, or "flex" for custom environments
+instance_class: F2
+env: standard
+
+env_variables:
+  TOGETHER_API_KEY: "tgp_v1_V34lNV7nfLpdPsShH_Prb0kDyf9GZ19kP9RuFExEVVM"
+  GEMINI_API_KEY: "AIzaSyAPjLeewXWKgBP-8WZVALK0dJdH02yYnqQ"
 
 handlers:
   - url: /.*
