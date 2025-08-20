@@ -1,12 +1,13 @@
 runtime: nodejs20
-
-instance_class: F2
 env: standard
+instance_class: F2
+
+handlers:
+  - url: /.*
+    secure: always
+    script: auto
 
 env_variables:
   TOGETHER_API_KEY: "tgp_v1_V34lNV7nfLpdPsShH_Prb0kDyf9GZ19kP9RuFExEVVM"
   GEMINI_API_KEY: "AIzaSyAPjLeewXWKgBP-8WZVALK0dJdH02yYnqQ"
 
-handlers:
-  - url: /.*
-    script: auto

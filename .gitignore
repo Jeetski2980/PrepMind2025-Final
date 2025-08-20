@@ -1,8 +1,7 @@
 # Node & builds
 node_modules
 dist
-build
-dist-ssr
+.env
 
 # Logs
 *.log
@@ -25,4 +24,5 @@ Thumbs.db
 *.pem
 *.key
 service-account.json
+.env
 .env
