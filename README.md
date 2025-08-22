@@ -782,9 +782,7 @@ npm run dev
 #### 2. Environment Configuration
 Copy `.env.example` to `.env` in the project root and fill in your keys:
 ```env
-# AI Service Configuration
-TOGETHER_API_KEY=tgp_v1_4IUWK6VL0xtRkws2GESmHCs3duZIA4PQ0pY2zzbPUf4
-GOOGLE_AI_STUDIO_API_KEY=AIzaSyAPjLeewXWKgBP-8WZVALK0dJdH02yYnqQ
+
 
 # Development Settings
 NODE_ENV=development
