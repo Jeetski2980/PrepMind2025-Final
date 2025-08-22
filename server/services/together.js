@@ -8,7 +8,7 @@ function requireEnv(name) {
   return v;
 }
 
-// Secrets come from Render/GCP env or local .env
+// Server-only secrets (set at runtime: Cloud Run / App Engine / local .env)
 const together = new Together({ apiKey: requireEnv("TOGETHER_API_KEY") });
 const genAI = new GoogleGenerativeAI(requireEnv("GEMINI_API_KEY"));
 const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });

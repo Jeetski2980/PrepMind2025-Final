@@ -1,41 +1,49 @@
 // server/index.js
-import "dotenv/config";
+import "dotenv/config"; // for local dev (.env). Not used in production unless mounted.
 import express from "express";
 import cors from "cors";
-import { handleGenerateQuestions } from "./routes/questions.js";
-import { handleChat } from "./routes/chat.js";
+import path from "path";
+import { fileURLToPath } from "url";
+import { generateQuestions, generateChatResponse } from "./services/together.js";
 
-export function createServer() {
-  const app = express();
+const app = express();
+app.use(cors());
+app.use(express.json({ limit: "1mb" }));
 
-  // Parse JSON bodies
-  app.use(express.json());
+// Health check
+app.get("/api/health", (_req, res) => res.json({ ok: true }));
 
-  // CORS: lock to domains in CORS_ORIGIN (comma-separated)
-  const allowed = (process.env.CORS_ORIGIN || "")
-    .split(",")
-    .map(s => s.trim())
-    .filter(Boolean);
+// API: generate questions
+app.post("/api/generate-questions", async (req, res) => {
+  try {
+    const { testType, subject, topic, numQuestions = 5 } = req.body || {};
+    const data = await generateQuestions(testType, subject, topic, Number(numQuestions));
+    res.json({ questions: data });
+  } catch (e) {
+    res.status(500).json({ error: String(e.message || e) });
+  }
+});
 
-  app.use(
-    cors({
-      origin: (origin, cb) => {
-        if (!origin) return cb(null, true); // allow curl/mobile apps
-        const ok = allowed.length === 0 ? true : allowed.includes(origin);
-        cb(ok ? null : new Error("Not allowed by CORS"), ok);
-      },
-      credentials: true,
-    })
-  );
+// API: chat
+app.post("/api/chat", async (req, res) => {
+  try {
+    const { message } = req.body || {};
+    const text = await generateChatResponse(message || "");
+    res.json({ content: text });
+  } catch (e) {
+    res.status(500).json({ error: String(e.message || e) });
+  }
+});
 
-  // Health check
-  app.get("/api/ping", (_req, res) => {
-    res.json({ message: "PrepMind API is running" });
-  });
+// --- Serve built client (optional: if same service serves frontend) ---
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const clientDist = path.join(__dirname, "..", "dist");
 
-  // API routes
-  app.post("/api/generate-questions", handleGenerateQuestions);
-  app.post("/api/chat", handleChat);
+app.use(express.static(clientDist));
+app.get("*", (_req, res) => res.sendFile(path.join(clientDist, "index.html")));
 
-  return app;
-}
+const port = process.env.PORT || 8080;
+app.listen(port, () => {
+  console.log(`Server listening on http://localhost:${port}`);
+});
