@@ -14,7 +14,7 @@ export default ({ mode }) => {
     },
     resolve: {
       alias: {
-        "@": path.resolve(__dirname, "client"), // lets you use "@/..." imports
+        "@": path.resolve(__dirname, "./client"),
       },
     },
     build: {
@@ -22,7 +22,6 @@ export default ({ mode }) => {
       sourcemap: true,
     },
     server: {
-      host: "0.0.0.0",  // so it binds to all interfaces
       port: 5173,
       strictPort: true,
     },
