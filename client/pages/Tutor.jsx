@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 import Layout from "@/components/Layout";
 import ApiKeyNotice from "@/components/ApiKeyNotice";
-import { InlineMath, BlockMath } from 'react-katex';
+import { InlineMath, BlockMath } from "react-katex";
 
 export default function Tutor() {
   const [messages, setMessages] = useState([
@@ -30,7 +30,7 @@ export default function Tutor() {
   const [isListening, setIsListening] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [shouldAutoScroll, setShouldAutoScroll] = useState(false);
-  
+
   const messagesEndRef = useRef(null);
   const messagesContainerRef = useRef(null);
   const recognitionRef = useRef(null);
@@ -39,9 +39,10 @@ export default function Tutor() {
   // Check if user is near bottom before auto-scrolling
   const checkScrollPosition = () => {
     if (!messagesContainerRef.current) return;
-    
     const container = messagesContainerRef.current;
-    const isNearBottom = container.scrollHeight - container.scrollTop - container.clientHeight < 100;
+    const isNearBottom =
+      container.scrollHeight - container.scrollTop - container.clientHeight <
+      100;
     setShouldAutoScroll(isNearBottom);
   };
 
@@ -58,7 +59,8 @@ export default function Tutor() {
   useEffect(() => {
     // Initialize speech recognition
     if ("webkitSpeechRecognition" in window || "SpeechRecognition" in window) {
-      const SpeechRecognition = window.webkitSpeechRecognition || window.SpeechRecognition;
+      const SpeechRecognition =
+        window.webkitSpeechRecognition || window.SpeechRecognition;
       recognitionRef.current = new SpeechRecognition();
       recognitionRef.current.continuous = false;
       recognitionRef.current.interimResults = false;
@@ -107,8 +109,9 @@ export default function Tutor() {
   };
 
   const speakText = (text) => {
-    if (synthRef.current && !isSpeaking) {
-      const utterance = new SpeechSynthesisUtterance(text);
+    const safe = typeof text === "string" ? text : String(text ?? "");
+    if (synthRef.current && !isSpeaking && safe) {
+      const utterance = new SpeechSynthesisUtterance(safe);
       utterance.rate = 0.9;
       utterance.pitch = 1;
       utterance.volume = 0.8;
@@ -128,12 +131,36 @@ export default function Tutor() {
     }
   };
 
+  // --- SAFE chat call: accepts {content} or {reply} or {response}, always returns a string
+  async function sendChat(userText) {
+    try {
+      const res = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: userText }),
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        const msg = err?.error ? String(err.error) : `HTTP ${res.status}`;
+        return `Sorry, I hit an error: ${msg}`;
+      }
+
+      const data = await res.json();
+      const reply = data?.content ?? data?.reply ?? data?.response ?? "";
+      return typeof reply === "string" ? reply : JSON.stringify(reply);
+    } catch (e) {
+      return `Sorry, I hit an error: ${String(e.message || e)}`;
+    }
+  }
+
   const sendMessage = async () => {
-    if (!inputText.trim() || isLoading) return;
+    const trimmed = inputText.trim();
+    if (!trimmed || isLoading) return;
 
     const userMessage = {
       id: Date.now(),
-      text: inputText.trim(),
+      text: trimmed,
       isUser: true,
       timestamp: new Date(),
     };
@@ -143,28 +170,22 @@ export default function Tutor() {
     setIsLoading(true);
 
     try {
-      const response = await fetch("/api/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: userMessage.text }),
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        const aiMessage = {
-          id: Date.now() + 1,
-          text: data.response,
-          isUser: false,
-          timestamp: new Date(),
-        };
-        setMessages((prev) => [...prev, aiMessage]);
-      } else {
-        throw new Error("Failed to get response");
-      }
+      const replyText = await sendChat(userMessage.text);
+      const aiMessage = {
+        id: Date.now() + 1,
+        text:
+          typeof replyText === "string"
+            ? replyText
+            : JSON.stringify(replyText ?? ""),
+        isUser: false,
+        timestamp: new Date(),
+      };
+      setMessages((prev) => [...prev, aiMessage]);
     } catch (error) {
       const errorMessage = {
         id: Date.now() + 1,
-        text: "I'm sorry, I'm having trouble connecting right now. Please try again later.",
+        text:
+          "I'm sorry, I'm having trouble connecting right now. Please try again later.",
         isUser: false,
         timestamp: new Date(),
       };
@@ -174,23 +195,28 @@ export default function Tutor() {
     setIsLoading(false);
   };
 
-  const handleKeyPress = (e) => {
+  const handleKeyDown = (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       sendMessage();
     }
   };
 
+  // --- Rendering helpers (defensive: always treat text as a string)
   const renderMessageContent = (text) => {
+    const safeText = typeof text === "string" ? text : String(text ?? "");
     // Split text by highlight markers for explanation highlighting
-    const parts = text.split(/(<highlight>.*?<\/highlight>)/g);
+    const parts = safeText.split(/(<highlight>.*?<\/highlight>)/g);
 
     return parts.map((part, index) => {
       // Handle highlighted explanations
-      if (part.startsWith('<highlight>') && part.endsWith('</highlight>')) {
+      if (part.startsWith("<highlight>") && part.endsWith("</highlight>")) {
         const content = part.slice(11, -12); // Remove <highlight> tags
         return (
-          <span key={index} className="bg-yellow-200 dark:bg-yellow-600/30 px-1 py-0.5 rounded">
+          <span
+            key={index}
+            className="bg-yellow-200 dark:bg-yellow-600/30 px-1 py-0.5 rounded"
+          >
             {renderTextWithMath(content)}
           </span>
         );
@@ -201,25 +227,26 @@ export default function Tutor() {
   };
 
   const renderTextWithMath = (text) => {
+    const safe = typeof text === "string" ? text : String(text ?? "");
     // Handle inline math expressions (single $) and display math (double $$)
     const mathRegex = /(\$\$[^$]+\$\$|\$[^$]+\$)/g;
-    const parts = text.split(mathRegex);
+    const parts = safe.split(mathRegex);
 
     return parts.map((part, index) => {
-      if (part.startsWith('$$') && part.endsWith('$$')) {
+      if (part.startsWith("$$") && part.endsWith("$$")) {
         // Display math (block)
         const mathContent = part.slice(2, -2);
         try {
           return <BlockMath key={index} math={mathContent} />;
-        } catch (error) {
+        } catch {
           return <span key={index}>{part}</span>;
         }
-      } else if (part.startsWith('$') && part.endsWith('$')) {
+      } else if (part.startsWith("$") && part.endsWith("$")) {
         // Inline math
         const mathContent = part.slice(1, -1);
         try {
           return <InlineMath key={index} math={mathContent} />;
-        } catch (error) {
+        } catch {
           return <span key={index}>{part}</span>;
         }
       } else {
@@ -228,7 +255,7 @@ export default function Tutor() {
           <span
             key={index}
             dangerouslySetInnerHTML={{
-              __html: part.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+              __html: part.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>"),
             }}
           />
         );
@@ -258,7 +285,7 @@ export default function Tutor() {
           {/* Chat Container */}
           <Card className="bg-white dark:bg-black border dark:border-white/30 h-[600px] flex flex-col">
             {/* Messages */}
-            <div 
+            <div
               ref={messagesContainerRef}
               className="flex-1 p-6 overflow-y-auto space-y-4"
               onScroll={checkScrollPosition}
@@ -304,9 +331,7 @@ export default function Tutor() {
                           variant="ghost"
                           size="sm"
                           onClick={() =>
-                            isSpeaking
-                              ? stopSpeaking()
-                              : speakText(message.text)
+                            isSpeaking ? stopSpeaking() : speakText(message.text)
                           }
                           className="mt-2 p-1 h-6 w-6 hover:bg-gray-100 dark:hover:bg-white/10"
                         >
@@ -355,7 +380,7 @@ export default function Tutor() {
                   <Textarea
                     value={inputText}
                     onChange={(e) => setInputText(e.target.value)}
-                    onKeyPress={handleKeyPress}
+                    onKeyDown={handleKeyDown}
                     placeholder="Ask me anything..."
                     className="min-h-[60px] pr-12 resize-none dark:bg-black dark:border-white/50 dark:text-white"
                     disabled={isLoading}

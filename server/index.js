@@ -15,16 +15,17 @@ app.use(morgan('tiny'));
 app.use(express.json({ limit: '1mb' }));
 app.use(cors({ origin: ['http://localhost:8080', 'http://localhost:5173'] }));
 
-// Health
+// Health check
 app.get('/api/health', (_req, res) => res.json({ ok: true }));
 
-// Chat (Gemini key #1)
+// Tutor chatbot (Gemini key #1)
 app.post('/api/chat', async (req, res) => {
   try {
     const { message } = req.body || {};
     if (!message) return res.status(400).json({ error: "message required" });
     const content = await generateChatResponse(message);
-    res.json({ content });
+    // Return both keys to match any existing client code
+    res.json({ content, reply: content });
   } catch (e) {
     console.error("chat error:", e);
     res.status(500).json({ error: String(e.message || e) });
