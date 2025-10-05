@@ -1,4 +1,4 @@
-import { generateChatResponse } from "../services/together.js";
+import { generateChatResponse } from "../services/gemini.js";
 
 export async function handleChat(req, res) {
   try {

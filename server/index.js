@@ -1,49 +1,63 @@
 // server/index.js
-import "dotenv/config"; // for local dev (.env). Not used in production unless mounted.
-import express from "express";
-import cors from "cors";
-import path from "path";
-import { fileURLToPath } from "url";
-import { generateQuestions, generateChatResponse } from "./services/together.js";
+import 'dotenv/config';
+import express from 'express';
+import cors from 'cors';
+import morgan from 'morgan';
+import path from 'path';
+import fs from 'fs';
+import { fileURLToPath } from 'url';
+import { generateChatResponse, generateQuestions } from './services/gemini.js';
 
 const app = express();
-app.use(cors());
-app.use(express.json({ limit: "1mb" }));
+const PORT = process.env.PORT || 8080;
 
-// Health check
-app.get("/api/health", (_req, res) => res.json({ ok: true }));
+app.use(morgan('tiny'));
+app.use(express.json({ limit: '1mb' }));
+app.use(cors({ origin: ['http://localhost:8080', 'http://localhost:5173'] }));
 
-// API: generate questions
-app.post("/api/generate-questions", async (req, res) => {
-  try {
-    const { testType, subject, topic, numQuestions = 5 } = req.body || {};
-    const data = await generateQuestions(testType, subject, topic, Number(numQuestions));
-    res.json({ questions: data });
-  } catch (e) {
-    res.status(500).json({ error: String(e.message || e) });
-  }
-});
+// Health
+app.get('/api/health', (_req, res) => res.json({ ok: true }));
 
-// API: chat
-app.post("/api/chat", async (req, res) => {
+// Chat (Gemini key #1)
+app.post('/api/chat', async (req, res) => {
   try {
     const { message } = req.body || {};
-    const text = await generateChatResponse(message || "");
-    res.json({ content: text });
+    if (!message) return res.status(400).json({ error: "message required" });
+    const content = await generateChatResponse(message);
+    res.json({ content });
   } catch (e) {
+    console.error("chat error:", e);
     res.status(500).json({ error: String(e.message || e) });
   }
 });
 
-// --- Serve built client (optional: if same service serves frontend) ---
+// Question generator (Gemini key #2)
+app.post('/api/generate-questions', async (req, res) => {
+  try {
+    const { testType, subject, topic, numQuestions } = req.body || {};
+    if (!testType || !subject || !topic) {
+      return res.status(400).json({ error: "testType, subject, topic required" });
+    }
+    const data = await generateQuestions({ testType, subject, topic, numQuestions });
+    res.json(data);
+  } catch (e) {
+    console.error("questions error:", e);
+    res.status(500).json({ error: String(e.message || e) });
+  }
+});
+
+// Serve client (prefer /dist, fallback to /public)
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const clientDist = path.join(__dirname, "..", "dist");
+const distDir = path.join(__dirname, '..', 'dist');
+const publicDir = path.join(__dirname, '..', 'public');
+const serveDir = fs.existsSync(distDir) ? distDir : publicDir;
 
-app.use(express.static(clientDist));
-app.get("*", (_req, res) => res.sendFile(path.join(clientDist, "index.html")));
+app.use(express.static(serveDir));
+app.get('*', (_req, res) => res.sendFile(path.join(serveDir, 'index.html')));
 
-const port = process.env.PORT || 8080;
-app.listen(port, () => {
-  console.log(`Server listening on http://localhost:${port}`);
+app.listen(PORT, () => {
+  console.log(`✅ Server running at http://localhost:${PORT}`);
+  console.log('Has GEMINI_CHAT_API_KEY?', !!process.env.GEMINI_CHAT_API_KEY);
+  console.log('Has GEMINI_QA_API_KEY?', !!process.env.GEMINI_QA_API_KEY);
 });

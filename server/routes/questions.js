@@ -1,4 +1,4 @@
-import { generateQuestions } from "../services/together.js";
+import { generateQuestions } from "../services/gemini.js";
 
 export async function handleGenerateQuestions(req, res) {
   try {
