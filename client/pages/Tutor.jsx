@@ -20,7 +20,8 @@ export default function Tutor() {
   const [messages, setMessages] = useState([
     {
       id: 1,
-      text: "Hi! I'm here to help you understand SAT, ACT, and AP exam concepts. Try typing or using your voice to ask me anything about test prep!",
+      text:
+        "Hi! I'm here to help you understand SAT, ACT, and AP exam concepts. Try typing or using your voice to ask me anything about test prep!",
       isUser: false,
       timestamp: new Date(),
     },
@@ -29,35 +30,33 @@ export default function Tutor() {
   const [isLoading, setIsLoading] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
-  const [shouldAutoScroll, setShouldAutoScroll] = useState(false);
+  const [shouldAutoScroll, setShouldAutoScroll] = useState(true); // start true
 
-  const messagesEndRef = useRef(null);
   const messagesContainerRef = useRef(null);
   const recognitionRef = useRef(null);
   const synthRef = useRef(null);
 
-  // Check if user is near bottom before auto-scrolling
+  // Only scroll the chat container (not the page)
+  const scrollToBottom = () => {
+    const el = messagesContainerRef.current;
+    if (!el) return;
+    el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
+  };
+
+  // Track when user is near bottom so we only auto-scroll then
   const checkScrollPosition = () => {
-    if (!messagesContainerRef.current) return;
-    const container = messagesContainerRef.current;
-    const isNearBottom =
-      container.scrollHeight - container.scrollTop - container.clientHeight <
-      100;
+    const el = messagesContainerRef.current;
+    if (!el) return;
+    const isNearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 100;
     setShouldAutoScroll(isNearBottom);
   };
 
-  const scrollToBottom = () => {
-    if (shouldAutoScroll && messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
-    }
-  };
+  useEffect(() => {
+    if (shouldAutoScroll) scrollToBottom();
+  }, [messages, shouldAutoScroll]);
 
   useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
-
-  useEffect(() => {
-    // Initialize speech recognition
+    // Speech recognition
     if ("webkitSpeechRecognition" in window || "SpeechRecognition" in window) {
       const SpeechRecognition =
         window.webkitSpeechRecognition || window.SpeechRecognition;
@@ -66,31 +65,21 @@ export default function Tutor() {
       recognitionRef.current.interimResults = false;
       recognitionRef.current.lang = "en-US";
 
-      recognitionRef.current.onresult = (event) => {
-        const transcript = event.results[0][0].transcript;
+      recognitionRef.current.onresult = (e) => {
+        const transcript = e.results[0][0].transcript;
         setInputText(transcript);
         setIsListening(false);
       };
-
-      recognitionRef.current.onend = () => {
-        setIsListening(false);
-      };
-
-      recognitionRef.current.onerror = () => {
-        setIsListening(false);
-      };
+      recognitionRef.current.onend = () => setIsListening(false);
+      recognitionRef.current.onerror = () => setIsListening(false);
     }
 
-    // Initialize speech synthesis
+    // Speech synthesis
     synthRef.current = window.speechSynthesis;
 
     return () => {
-      if (recognitionRef.current) {
-        recognitionRef.current.stop();
-      }
-      if (synthRef.current) {
-        synthRef.current.cancel();
-      }
+      recognitionRef.current?.stop();
+      synthRef.current?.cancel();
     };
   }, []);
 
@@ -100,38 +89,30 @@ export default function Tutor() {
       recognitionRef.current.start();
     }
   };
-
   const stopListening = () => {
-    if (recognitionRef.current && isListening) {
-      recognitionRef.current.stop();
-      setIsListening(false);
-    }
+    recognitionRef.current?.stop();
+    setIsListening(false);
   };
 
   const speakText = (text) => {
     const safe = typeof text === "string" ? text : String(text ?? "");
     if (synthRef.current && !isSpeaking && safe) {
-      const utterance = new SpeechSynthesisUtterance(safe);
-      utterance.rate = 0.9;
-      utterance.pitch = 1;
-      utterance.volume = 0.8;
-
-      utterance.onstart = () => setIsSpeaking(true);
-      utterance.onend = () => setIsSpeaking(false);
-      utterance.onerror = () => setIsSpeaking(false);
-
-      synthRef.current.speak(utterance);
+      const u = new SpeechSynthesisUtterance(safe);
+      u.rate = 0.9;
+      u.pitch = 1;
+      u.volume = 0.8;
+      u.onstart = () => setIsSpeaking(true);
+      u.onend = () => setIsSpeaking(false);
+      u.onerror = () => setIsSpeaking(false);
+      synthRef.current.speak(u);
     }
   };
-
   const stopSpeaking = () => {
-    if (synthRef.current) {
-      synthRef.current.cancel();
-      setIsSpeaking(false);
-    }
+    synthRef.current?.cancel();
+    setIsSpeaking(false);
   };
 
-  // --- SAFE chat call: accepts {content} or {reply} or {response}, always returns a string
+  // Safe chat call; always returns a string and accepts multiple response shapes
   async function sendChat(userText) {
     try {
       const res = await fetch("/api/chat", {
@@ -139,13 +120,11 @@ export default function Tutor() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message: userText }),
       });
-
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
         const msg = err?.error ? String(err.error) : `HTTP ${res.status}`;
         return `Sorry, I hit an error: ${msg}`;
       }
-
       const data = await res.json();
       const reply = data?.content ?? data?.reply ?? data?.response ?? "";
       return typeof reply === "string" ? reply : JSON.stringify(reply);
@@ -164,7 +143,6 @@ export default function Tutor() {
       isUser: true,
       timestamp: new Date(),
     };
-
     setMessages((prev) => [...prev, userMessage]);
     setInputText("");
     setIsLoading(true);
@@ -181,17 +159,18 @@ export default function Tutor() {
         timestamp: new Date(),
       };
       setMessages((prev) => [...prev, aiMessage]);
-    } catch (error) {
-      const errorMessage = {
-        id: Date.now() + 1,
-        text:
-          "I'm sorry, I'm having trouble connecting right now. Please try again later.",
-        isUser: false,
-        timestamp: new Date(),
-      };
-      setMessages((prev) => [...prev, errorMessage]);
+    } catch {
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: Date.now() + 1,
+          text:
+            "I'm sorry, I'm having trouble connecting right now. Please try again later.",
+          isUser: false,
+          timestamp: new Date(),
+        },
+      ]);
     }
-
     setIsLoading(false);
   };
 
@@ -202,58 +181,50 @@ export default function Tutor() {
     }
   };
 
-  // --- Rendering helpers (defensive: always treat text as a string)
+  // Rendering helpers (safe coercions)
   const renderMessageContent = (text) => {
     const safeText = typeof text === "string" ? text : String(text ?? "");
-    // Split text by highlight markers for explanation highlighting
     const parts = safeText.split(/(<highlight>.*?<\/highlight>)/g);
-
-    return parts.map((part, index) => {
-      // Handle highlighted explanations
+    return parts.map((part, i) => {
       if (part.startsWith("<highlight>") && part.endsWith("</highlight>")) {
-        const content = part.slice(11, -12); // Remove <highlight> tags
+        const content = part.slice(11, -12);
         return (
           <span
-            key={index}
+            key={i}
             className="bg-yellow-200 dark:bg-yellow-600/30 px-1 py-0.5 rounded"
           >
             {renderTextWithMath(content)}
           </span>
         );
       }
-
-      return <span key={index}>{renderTextWithMath(part)}</span>;
+      return <span key={i}>{renderTextWithMath(part)}</span>;
     });
   };
 
   const renderTextWithMath = (text) => {
     const safe = typeof text === "string" ? text : String(text ?? "");
-    // Handle inline math expressions (single $) and display math (double $$)
     const mathRegex = /(\$\$[^$]+\$\$|\$[^$]+\$)/g;
     const parts = safe.split(mathRegex);
 
-    return parts.map((part, index) => {
+    return parts.map((part, i) => {
       if (part.startsWith("$$") && part.endsWith("$$")) {
-        // Display math (block)
         const mathContent = part.slice(2, -2);
         try {
-          return <BlockMath key={index} math={mathContent} />;
+          return <BlockMath key={i} math={mathContent} />;
         } catch {
-          return <span key={index}>{part}</span>;
+          return <span key={i}>{part}</span>;
         }
       } else if (part.startsWith("$") && part.endsWith("$")) {
-        // Inline math
         const mathContent = part.slice(1, -1);
         try {
-          return <InlineMath key={index} math={mathContent} />;
+          return <InlineMath key={i} math={mathContent} />;
         } catch {
-          return <span key={index}>{part}</span>;
+          return <span key={i}>{part}</span>;
         }
       } else {
-        // Regular text with bold formatting
         return (
           <span
-            key={index}
+            key={i}
             dangerouslySetInnerHTML={{
               __html: part.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>"),
             }}
@@ -287,13 +258,15 @@ export default function Tutor() {
             {/* Messages */}
             <div
               ref={messagesContainerRef}
-              className="flex-1 p-6 overflow-y-auto space-y-4"
+              className="flex-1 p-6 overflow-y-auto overscroll-contain space-y-4"
               onScroll={checkScrollPosition}
             >
               {messages.map((message) => (
                 <div
                   key={message.id}
-                  className={`flex ${message.isUser ? "justify-end" : "justify-start"}`}
+                  className={`flex ${
+                    message.isUser ? "justify-end" : "justify-start"
+                  }`}
                 >
                   <div
                     className={`max-w-[80%] flex items-start space-x-3 ${
@@ -369,8 +342,6 @@ export default function Tutor() {
                   </div>
                 </div>
               )}
-
-              <div ref={messagesEndRef} />
             </div>
 
             {/* Input Area */}

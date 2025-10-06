@@ -6,113 +6,86 @@ import { Badge } from "@/components/ui/badge";
 import { BookOpen, CheckCircle, XCircle, Lightbulb, RotateCcw } from "lucide-react";
 import Layout from "@/components/Layout";
 import ApiKeyNotice from "@/components/ApiKeyNotice";
-import { InlineMath, BlockMath } from 'react-katex';
+import { InlineMath, BlockMath } from "react-katex";
+
+/* ---------- Config ---------- */
 
 const TEST_SUBJECTS = {
-  "SAT": ["Math", "Reading", "Writing"],
-  "ACT": ["Math", "Reading", "English", "Science"],
+  SAT: ["Math", "Reading", "Writing"],
+  ACT: ["Math", "Reading", "English", "Science"],
   "AP Exams": [
-    "Calculus AB", "Calculus BC", "Statistics", "Physics 1", "Physics 2", 
-    "Physics C", "Chemistry", "Biology", "English Language", "English Literature",
-    "US History", "World History", "Government", "Psychology", "Computer Science A"
-  ]
+    "Calculus AB","Calculus BC","Statistics","Physics 1","Physics 2",
+    "Physics C","Chemistry","Biology","English Language","English Literature",
+    "US History","World History","Government","Psychology","Computer Science A"
+  ],
 };
 
 const TOPIC_OPTIONS = {
-  "Math": ["Algebra", "Geometry", "Trigonometry", "Statistics", "Functions"],
-  "Reading": ["Reading Comprehension", "Vocabulary", "Main Ideas", "Inferences"],
-  "Writing": ["Grammar", "Sentence Structure", "Essay Writing", "Rhetorical Analysis"],
-  "English": ["Grammar", "Punctuation", "Style", "Strategy"],
-  "Science": ["Data Analysis", "Scientific Reasoning", "Research Summaries"],
-  // AP Exams
-  "Calculus AB": ["Limits", "Derivatives", "Integrals", "Applications"],
-  "Calculus BC": ["Series", "Parametric Equations", "Polar Coordinates", "Advanced Integration"],
-  "Statistics": ["Probability", "Sampling", "Inference", "Regression"],
-  "Physics 1": ["Kinematics", "Forces", "Energy", "Waves"],
-  "Physics 2": ["Fluid Mechanics", "Thermodynamics", "Electrostatics", "Magnetism"],
-  "Physics C": ["Mechanics", "Electricity & Magnetism", "Advanced Calculus"],
-  "Chemistry": ["Atomic Structure", "Chemical Bonding", "Reactions", "Thermodynamics"],
-  "Biology": ["Cell Biology", "Genetics", "Evolution", "Ecology"],
-  "English Language": ["Rhetorical Analysis", "Synthesis", "Argument Writing", "Language Use"],
-  "English Literature": ["Poetry Analysis", "Prose Analysis", "Literary Devices", "Thematic Analysis"],
-  "US History": ["Colonial Period", "Revolutionary Era", "Civil War", "Modern America"],
-  "World History": ["Ancient Civilizations", "Medieval Period", "Renaissance", "Modern World"],
-  "Government": ["Constitutional Principles", "Political Institutions", "Civil Rights", "Public Policy"],
-  "Psychology": ["Biological Bases", "Sensation & Perception", "Learning", "Cognition"],
-  "Computer Science A": ["Object-Oriented Programming", "Data Structures", "Algorithms", "Program Design"]
+  Math: ["Algebra","Geometry","Trigonometry","Statistics","Functions"],
+  Reading: ["Reading Comprehension","Vocabulary","Main Ideas","Inferences"],
+  Writing: ["Grammar","Sentence Structure","Essay Writing","Rhetorical Analysis"],
+  English: ["Grammar","Punctuation","Style","Strategy"],
+  Science: ["Data Analysis","Scientific Reasoning","Research Summaries"],
+  // AP
+  "Calculus AB": ["Limits","Derivatives","Integrals","Applications"],
+  "Calculus BC": ["Series","Parametric Equations","Polar Coordinates","Advanced Integration"],
+  Statistics: ["Probability","Sampling","Inference","Regression"],
+  "Physics 1": ["Kinematics","Forces","Energy","Waves"],
+  "Physics 2": ["Fluid Mechanics","Thermodynamics","Electrostatics","Magnetism"],
+  "Physics C": ["Mechanics","Electricity & Magnetism","Advanced Calculus"],
+  Chemistry: ["Atomic Structure","Chemical Bonding","Reactions","Thermodynamics"],
+  Biology: ["Cell Biology","Genetics","Evolution","Ecology"],
+  "English Language": ["Rhetorical Analysis","Synthesis","Argument Writing","Language Use"],
+  "English Literature": ["Poetry Analysis","Prose Analysis","Literary Devices","Thematic Analysis"],
+  "US History": ["Colonial Period","Revolutionary Era","Civil War","Modern America"],
+  "World History": ["Ancient Civilizations","Medieval Period","Renaissance","Modern World"],
+  Government: ["Constitutional Principles","Political Institutions","Civil Rights","Public Policy"],
+  Psychology: ["Biological Bases","Sensation & Perception","Learning","Cognition"],
+  "Computer Science A": ["Object-Oriented Programming","Data Structures","Algorithms","Program Design"],
 };
 
-// Math rendering function for all text (questions, choices, explanations)
+/* ---------- Math rendering (safe & simple) ---------- */
+/* We only render text already wrapped in $...$ or $$...$$.
+   No aggressive auto-conversion that can create mismatched dollars. */
+
 const renderTextWithMath = (text) => {
-  if (!text) return text;
+  if (text == null) return null;
+  const str = String(text);
 
-  // First, convert common plain text math patterns to LaTeX
-  let processedText = text
-    // Convert fractions like (a/b) to $\frac{a}{b}$
-    .replace(/\((\w+)\/(\w+)\)/g, '$\\frac{$1}{$2}$')
-    // Convert simple fractions like a/b (but not URLs or dates)
-    .replace(/\b(\d+)\/(\d+)\b/g, '$\\frac{$1}{$2}$')
-    // Convert powers like x^2, x^3, etc.
-    .replace(/(\w+)\^(\d+)/g, '$$$1^{$2}$$')
-    // Convert powers with parentheses like (x+1)^2
-    .replace(/\(([^)]+)\)\^(\d+)/g, '$($1)^{$2}$')
-    // Convert square roots like √x or sqrt(x)
-    .replace(/√(\w+)/g, '$\\sqrt{$1}$')
-    .replace(/sqrt\(([^)]+)\)/g, '$\\sqrt{$1}$')
-    // Convert integrals like ∫
-    .replace(/∫/g, '$\\int$')
-    // Convert Greek letters
-    .replace(/π/g, '$\\pi$')
-    .replace(/θ/g, '$\\theta$')
-    .replace(/α/g, '$\\alpha$')
-    .replace(/β/g, '$\\beta$')
-    .replace(/γ/g, '$\\gamma$')
-    .replace(/δ/g, '$\\delta$')
-    .replace(/λ/g, '$\\lambda$')
-    .replace(/μ/g, '$\\mu$')
-    .replace(/σ/g, '$\\sigma$')
-    .replace(/Σ/g, '$\\Sigma$');
+  // Support LaTeX \( ... \) and \[ ... \] by normalizing to $...$ / $$...$$
+  const normalized = str
+    .replace(/\\\((.+?)\\\)/g, (_m, p1) => `$${p1}$`)
+    .replace(/\\\[(.+?)\\\]/gs, (_m, p1) => `$$${p1}$$`);
 
-  // Handle inline math expressions (single $) and display math (double $$)
-  const mathRegex = /(\$\$[^$]+\$\$|\$[^$]+\$)/g;
-  const parts = processedText.split(mathRegex);
+  // Split into math/non-math chunks; allow block math to span lines
+  const parts = normalized.split(/(\$\$[\s\S]+?\$\$|\$[^$]+\$)/g);
 
-  return parts.map((part, index) => {
-    if (part.startsWith('$$') && part.endsWith('$$')) {
-      // Display math (block)
-      const mathContent = part.slice(2, -2);
-      try {
-        return <BlockMath key={index} math={mathContent} />;
-      } catch (error) {
-        return <span key={index}>{part}</span>;
-      }
-    } else if (part.startsWith('$') && part.endsWith('$')) {
-      // Inline math
-      const mathContent = part.slice(1, -1);
-      try {
-        return <InlineMath key={index} math={mathContent} />;
-      } catch (error) {
-        return <span key={index}>{part}</span>;
-      }
-    } else {
-      // Regular text with bold formatting
-      return (
-        <span
-          key={index}
-          dangerouslySetInnerHTML={{
-            __html: part.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-          }}
-        />
-      );
+  return parts.map((part, i) => {
+    if (part.startsWith("$$") && part.endsWith("$$")) {
+      const math = part.slice(2, -2);
+      try { return <BlockMath key={i} math={math} />; } catch { return <span key={i}>{part}</span>; }
     }
+    if (part.startsWith("$") && part.endsWith("$")) {
+      const math = part.slice(1, -1);
+      try { return <InlineMath key={i} math={math} />; } catch { return <span key={i}>{part}</span>; }
+    }
+    return (
+      <span
+        key={i}
+        dangerouslySetInnerHTML={{ __html: part.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>") }}
+      />
+    );
   });
 };
+
+/* ---------- Page ---------- */
 
 export default function Practice() {
   const [testType, setTestType] = useState("");
   const [subject, setSubject] = useState("");
   const [topic, setTopic] = useState("");
   const [numQuestions, setNumQuestions] = useState("5");
+
   const [questions, setQuestions] = useState([]);
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [selectedAnswers, setSelectedAnswers] = useState({});
@@ -123,101 +96,108 @@ export default function Practice() {
   const availableSubjects = testType ? TEST_SUBJECTS[testType] || [] : [];
   const availableTopics = subject ? TOPIC_OPTIONS[subject] || [] : [];
 
-  const generateQuestions = async () => {
-    if (!testType || !subject) return;
+  const suggestTopics = () => {
+    if (subject && availableTopics.length > 0) {
+      const r = availableTopics[Math.floor(Math.random() * availableTopics.length)];
+      setTopic(r);
+    }
+  };
 
+  async function generateQuestions() {
+    if (!testType || !subject) return;
     setIsGenerating(true);
     setError("");
 
     try {
-      // Add timeout with longer duration for AI generation
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 90000); // 30 second timeout
+      const timeoutId = setTimeout(() => controller.abort(), 90000);
 
-      const response = await fetch('/api/generate-questions', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const res = await fetch("/api/generate-questions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           testType,
           subject,
           topic: topic || "General",
-          numQuestions: parseInt(numQuestions)
+          numQuestions: parseInt(numQuestions, 10),
         }),
-        signal: controller.signal
+        signal: controller.signal,
       });
 
       clearTimeout(timeoutId);
 
-      if (response.ok) {
-        const data = await response.json();
-        if (data.questions && data.questions.length > 0) {
-          setQuestions(data.questions);
-          setCurrentQuestion(0);
-          setSelectedAnswers({});
-          setShowResults(false);
-          setError("");
-        } else {
-          setError("No questions were generated. Please try again.");
-        }
-      } else {
-        // Handle error responses safely
-        let errorMessage = "Failed to generate questions. Please try again.";
-        try {
-          const errorData = await response.json();
-          errorMessage = errorData.error || errorMessage;
-        } catch (jsonError) {
-          // If JSON parsing fails, use status text or default message
-          errorMessage = response.statusText || errorMessage;
-        }
-        setError(errorMessage);
+      if (!res.ok) {
+        let msg = "Failed to generate questions. Please try again.";
+        try { msg = (await res.json())?.error || msg; } catch {}
+        setError(msg);
+        setIsGenerating(false);
+        return;
       }
-    } catch (error) {
-      if (error.name === 'AbortError') {
-        setError("AI generation is taking longer than expected. Please try again or reduce the number of questions.");
-      } else if (error.message.includes('Failed to fetch')) {
+
+      const data = await res.json();
+
+      // Normalize to ensure we always have a reliable answerIndex
+      const letterToIndex = { A: 0, B: 1, C: 2, D: 3 };
+      const normalized = (data?.questions || []).map((q) => {
+        const idx =
+          Number.isInteger(q?.answerIndex)
+            ? q.answerIndex
+            : Number.isInteger(q?.correctIndex)
+            ? q.correctIndex
+            : letterToIndex[(q?.answer || "").toUpperCase()] ?? 0;
+        return { ...q, answerIndex: idx, correctIndex: idx, choices: q.choices || [] };
+      });
+
+      if (normalized.length === 0) {
+        setError("No questions were generated. Please try again.");
+        setIsGenerating(false);
+        return;
+      }
+
+      setQuestions(normalized);
+      setCurrentQuestion(0);
+      setSelectedAnswers({});
+      setShowResults(false);
+    } catch (e) {
+      if (e.name === "AbortError") {
+        setError("AI is taking a while. Try again or reduce the number of questions.");
+      } else if (String(e.message || "").includes("Failed to fetch")) {
         setError("Network error. Please check your connection and try again.");
       } else {
         setError("Error generating questions. Please try again.");
       }
-      console.error('Error generating questions:', error);
+      console.error("Error generating questions:", e);
     }
+
     setIsGenerating(false);
-  };
+  }
 
-  const selectAnswer = (questionIndex, answerIndex) => {
+  const selectAnswer = (qIdx, aIdx) => {
     if (showResults) return;
-    setSelectedAnswers(prev => ({
-      ...prev,
-      [questionIndex]: answerIndex
-    }));
+    setSelectedAnswers((prev) => ({ ...prev, [qIdx]: aIdx }));
   };
 
-  const submitAnswers = () => {
-    setShowResults(true);
-  };
+  const submitAnswers = () => setShowResults(true);
 
   const resetQuiz = () => {
     setQuestions([]);
     setCurrentQuestion(0);
     setSelectedAnswers({});
     setShowResults(false);
+    setError("");
   };
 
   const calculateScore = () => {
+    if (!questions.length) return 0;
     let correct = 0;
-    questions.forEach((question, index) => {
-      if (selectedAnswers[index] === question.correct_answer) {
-        correct++;
-      }
+    questions.forEach((q, i) => {
+      const selected = selectedAnswers[i];
+      const correctIdx = Number.isInteger(q.answerIndex)
+        ? q.answerIndex
+        : ({ A: 0, B: 1, C: 2, D: 3 }[q.answer?.toUpperCase()] ?? 0);
+      if (selected === correctIdx) correct += 1;
     });
     return Math.round((correct / questions.length) * 100);
-  };
-
-  const suggestTopics = () => {
-    if (subject && availableTopics.length > 0) {
-      const randomTopic = availableTopics[Math.floor(Math.random() * availableTopics.length)];
-      setTopic(randomTopic);
-    }
   };
 
   return (
@@ -229,7 +209,9 @@ export default function Practice() {
             <div className="w-16 h-16 bg-emerald-100 dark:bg-emerald-400/10 rounded-full flex items-center justify-center mx-auto mb-4">
               <BookOpen className="w-8 h-8 text-emerald-600 dark:text-emerald-400" />
             </div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">AI Practice Questions</h1>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+              AI Practice Questions
+            </h1>
             <p className="text-gray-600 dark:text-white/70">
               Get personalized practice questions generated by AI for your specific test and subject
             </p>
@@ -238,7 +220,7 @@ export default function Practice() {
           {questions.length === 0 ? (
             <div>
               <ApiKeyNotice />
-              
+
               <Card className="bg-white dark:bg-black border dark:border-white/20">
                 <CardHeader>
                   <CardTitle className="text-gray-900 dark:text-white">Choose Your Test</CardTitle>
@@ -273,7 +255,9 @@ export default function Practice() {
                         </SelectTrigger>
                         <SelectContent className="dark:bg-black dark:border-white/50">
                           {availableSubjects.map((subj) => (
-                            <SelectItem key={subj} value={subj}>{subj}</SelectItem>
+                            <SelectItem key={subj} value={subj}>
+                              {subj}
+                            </SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
@@ -322,8 +306,8 @@ export default function Practice() {
                             variant={topic === topicOption ? "default" : "outline"}
                             className={`cursor-pointer transition-colors ${
                               topic === topicOption
-                                ? 'bg-emerald-600 dark:bg-emerald-400 text-white dark:text-black'
-                                : 'hover:bg-emerald-50 dark:hover:bg-emerald-400/10 dark:text-white dark:border-white/50'
+                                ? "bg-emerald-600 dark:bg-emerald-400 text-white dark:text-black"
+                                : "hover:bg-emerald-50 dark:hover:bg-emerald-400/10 dark:text-white dark:border-white/50"
                             }`}
                             onClick={() => setTopic(topic === topicOption ? "" : topicOption)}
                           >
@@ -342,14 +326,14 @@ export default function Practice() {
                     {isGenerating ? "Generating Questions..." : "Generate Practice Questions"}
                   </Button>
 
-                  {/* Error Display */}
+                  {/* Error */}
                   {error && (
                     <div className="p-4 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 rounded-lg">
                       <p className="text-red-600 dark:text-red-400 text-sm">{error}</p>
                     </div>
                   )}
 
-                  {/* Loader Animation */}
+                  {/* Loader */}
                   {isGenerating && (
                     <div className="loader">
                       <div className="cell d-0"></div>
@@ -402,15 +386,17 @@ export default function Practice() {
                           onClick={() => selectAnswer(currentQuestion, index)}
                           className={`w-full p-4 text-left border-2 rounded-lg transition-all ${
                             selectedAnswers[currentQuestion] === index
-                              ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-400/10 dark:border-emerald-400'
-                              : 'border-gray-200 dark:border-white/20 hover:border-gray-300 dark:hover:border-white/70'
+                              ? "border-emerald-500 bg-emerald-50 dark:bg-emerald-400/10 dark:border-emerald-400"
+                              : "border-gray-200 dark:border-white/20 hover:border-gray-300 dark:hover:border-white/70"
                           }`}
                         >
                           <div className="flex items-center">
                             <span className="w-8 h-8 rounded-full border-2 border-current flex items-center justify-center mr-3 text-sm font-semibold">
                               {String.fromCharCode(65 + index)}
                             </span>
-                            <span className="text-gray-900 dark:text-white">{renderTextWithMath(choice)}</span>
+                            <span className="text-gray-900 dark:text-white">
+                              {renderTextWithMath(choice)}
+                            </span>
                           </div>
                         </button>
                       ))}
@@ -436,7 +422,9 @@ export default function Practice() {
                         </Button>
                       ) : (
                         <Button
-                          onClick={() => setCurrentQuestion(Math.min(questions.length - 1, currentQuestion + 1))}
+                          onClick={() =>
+                            setCurrentQuestion(Math.min(questions.length - 1, currentQuestion + 1))
+                          }
                           className="bg-emerald-600 dark:bg-emerald-400 hover:bg-emerald-700 dark:hover:bg-emerald-500 text-white dark:text-black"
                         >
                           Next
@@ -456,47 +444,63 @@ export default function Practice() {
                     </CardHeader>
                   </Card>
 
-                  {questions.map((question, qIndex) => (
-                    <Card key={qIndex} className="bg-white dark:bg-black border dark:border-white/20">
-                      <CardContent className="p-6">
-                        <div className="flex items-start justify-between mb-4">
-                          <h3 className="font-semibold text-gray-900 dark:text-white">Question {qIndex + 1}</h3>
-                          {selectedAnswers[qIndex] === question.correct_answer ? (
-                            <CheckCircle className="w-6 h-6 text-green-500" />
-                          ) : (
-                            <XCircle className="w-6 h-6 text-red-500" />
-                          )}
-                        </div>
+                  {questions.map((q, qIndex) => {
+                    const correctIdx = Number.isInteger(q.answerIndex)
+                      ? q.answerIndex
+                      : ({ A: 0, B: 1, C: 2, D: 3 }[q.answer?.toUpperCase()] ?? 0);
 
-                        <div className="text-gray-900 dark:text-white mb-4">{renderTextWithMath(question.question)}</div>
+                    return (
+                      <Card key={qIndex} className="bg-white dark:bg-black border dark:border-white/20">
+                        <CardContent className="p-6">
+                          <div className="flex items-start justify-between mb-4">
+                            <h3 className="font-semibold text-gray-900 dark:text-white">
+                              Question {qIndex + 1}
+                            </h3>
+                            {selectedAnswers[qIndex] === correctIdx ? (
+                              <CheckCircle className="w-6 h-6 text-green-500" />
+                            ) : (
+                              <XCircle className="w-6 h-6 text-red-500" />
+                            )}
+                          </div>
 
-                        <div className="space-y-2 mb-4">
-                          {question.choices.map((choice, cIndex) => (
-                            <div
-                              key={cIndex}
-                              className={`p-3 rounded-lg border ${
-                                cIndex === question.correct_answer
-                                  ? 'border-green-500 bg-green-50 dark:bg-green-500/10'
-                                  : selectedAnswers[qIndex] === cIndex
-                                  ? 'border-red-500 bg-red-50 dark:bg-red-500/10'
-                                  : 'border-gray-200 dark:border-white/20'
-                              }`}
-                            >
-                              <span className="font-medium">
-                                {String.fromCharCode(65 + cIndex)}.
-                              </span>
-                              <span className="ml-2 text-gray-900 dark:text-white">{renderTextWithMath(choice)}</span>
+                          <div className="text-gray-900 dark:text-white mb-4">
+                            {renderTextWithMath(q.question)}
+                          </div>
+
+                          <div className="space-y-2 mb-4">
+                            {q.choices.map((choice, cIndex) => (
+                              <div
+                                key={cIndex}
+                                className={`p-3 rounded-lg border ${
+                                  cIndex === correctIdx
+                                    ? "border-green-500 bg-green-50 dark:bg-green-500/10"
+                                    : selectedAnswers[qIndex] === cIndex
+                                    ? "border-red-500 bg-red-50 dark:bg-red-500/10"
+                                    : "border-gray-200 dark:border-white/20"
+                                }`}
+                              >
+                                <span className="font-medium">
+                                  {String.fromCharCode(65 + cIndex)}.
+                                </span>
+                                <span className="ml-2 text-gray-900 dark:text-white">
+                                  {renderTextWithMath(choice)}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+
+                          <div className="bg-blue-50 dark:bg-white/10 p-4 rounded-lg border dark:border-white/30">
+                            <h4 className="font-semibold text-blue-900 dark:text-white mb-2">
+                              Explanation:
+                            </h4>
+                            <div className="text-blue-800 dark:text-white/80">
+                              {renderTextWithMath(q.explanation)}
                             </div>
-                          ))}
-                        </div>
-
-                        <div className="bg-blue-50 dark:bg-white/10 p-4 rounded-lg border dark:border-white/30">
-                          <h4 className="font-semibold text-blue-900 dark:text-white mb-2">Explanation:</h4>
-                          <div className="text-blue-800 dark:text-white/80">{renderTextWithMath(question.explanation)}</div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
 
                   <div className="flex justify-center">
                     <Button

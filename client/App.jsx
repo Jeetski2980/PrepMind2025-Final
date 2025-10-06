@@ -1,6 +1,7 @@
 import "./global.css";
 import { createRoot } from "react-dom/client";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import "katex/dist/katex.min.css";
 import Index from "./pages/Index";
 import Practice from "./pages/Practice";
 import Tutor from "./pages/Tutor";
