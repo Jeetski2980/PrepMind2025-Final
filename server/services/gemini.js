@@ -1,166 +1,142 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-const CHAT_KEY = process.env.GEMINI_CHAT_API_KEY;
-const QA_KEY   = process.env.GEMINI_QA_API_KEY;
-
+const CHAT_KEY  = process.env.GEMINI_CHAT_API_KEY || process.env.GOOGLE_API_KEY;
 const CHAT_MODEL = process.env.GEMINI_MODEL_CHAT || "gemini-2.5-flash";
-const QA_MODEL   = process.env.GEMINI_MODEL_QA   || "gemini-2.5-flash";
 
-function need(name, val) {
-  if (!val) throw new Error(`Missing required env: ${name}`);
-  return val;
+const QA_KEY    = process.env.GEMINI_QA_API_KEY   || CHAT_KEY;
+const QA_MODEL  = process.env.GEMINI_MODEL_QA     || "gemini-2.5-flash";
+
+/* ---------------- helpers ---------------- */
+
+function parseModelJson(text) {
+  if (!text) throw new Error("Empty model response.");
+  const fence = text.match(/```json([\s\S]*?)```/i);
+  const raw = fence ? fence[1] : text;
+  try { return JSON.parse(raw); } catch {}
+  const s = raw.indexOf("{"), e = raw.lastIndexOf("}");
+  if (s !== -1 && e !== -1 && e > s) {
+    const maybe = raw.slice(s, e + 1);
+    try { return JSON.parse(maybe); } catch {}
+  }
+  throw new Error("Invalid JSON from model.");
 }
 
-/* ---------------------- Chat (string-safe) ---------------------- */
-export async function generateChatResponse(message) {
-  const genAI = new GoogleGenerativeAI(need("GEMINI_CHAT_API_KEY", CHAT_KEY));
-  const model = genAI.getGenerativeModel({ model: CHAT_MODEL });
+// Lightly wrap common bare LaTeX only when no $ delimiters exist
+function autoWrapMath(s) {
+  if (!s) return s;
+  let out = String(s);
+  if (out.includes("$")) return out;
 
-  const prompt = `You are a friendly test-prep tutor (SAT/ACT/AP).
-Use clear steps and LaTeX ($...$ / $$...$$). Be concise.
-
-Student: ${message}`;
-
-  const result = await model.generateContent(prompt);
-
-  let text = "";
-  try {
-    text = (result?.response?.text?.() ?? "").trim();
-  } catch {
-    text = "";
-  }
-  return text || "I’m here! Try asking a math or test-prep question.";
+  out = out.replace(/\\frac\{([^{}]+)\}\{([^{}]+)\}/g, (_m, a, b) => `$\\frac{${a}}{${b}}$`);
+  out = out.replace(/\\sqrt\{([^{}]+)\}/g, (_m, a) => `$\\sqrt{${a}}$`);
+  out = out
+    .replace(/\b\\pi\b/g, '$\\pi$')
+    .replace(/\b\\theta\b/g, '$\\theta$')
+    .replace(/\b\\alpha\b/g, '$\\alpha$')
+    .replace(/\b\\beta\b/g, '$\\beta$')
+    .replace(/\b\\gamma\b/g, '$\\gamma$')
+    .replace(/\b\\delta\b/g, '$\\delta$')
+    .replace(/\b\\lambda\b/g, '$\\lambda$')
+    .replace(/\b\\mu\b/g, '$\\mu$')
+    .replace(/\b\\sigma\b/g, '$\\sigma$')
+    .replace(/\b\\leq\b/g, '$\\leq$')
+    .replace(/\b\\geq\b/g, '$\\geq$')
+    .replace(/\b\\neq\b/g, '$\\neq$')
+    .replace(/\b\\ne\b/g, '$\\ne$');
+  return out;
 }
 
-/* ----------------- Questions (JSON mode, robust) ---------------- */
-function extractJsonBlock(s) {
-  if (!s) return null;
-  const cleaned = s.replace(/```json|```/g, "").trim();
-  try {
-    return JSON.parse(cleaned);
-  } catch {
-    const first = cleaned.indexOf("{");
-    const last  = cleaned.lastIndexOf("}");
-    if (first >= 0 && last > first) {
-      const slice = cleaned.slice(first, last + 1);
-      try { return JSON.parse(slice); } catch {}
-    }
-  }
-  return null;
-}
-
-/**
- * Normalize each question and compute BOTH:
- *   - answer (letter: "A"|"B"|"C"|"D")
- *   - answerIndex / correctIndex (0..3)  ← use this for grading!
- */
-function normalizeQA(parsed) {
-  if (!parsed || !Array.isArray(parsed.questions)) {
-    throw new Error("Questions JSON missing 'questions' array.");
-  }
-
+function normalizeQA(q) {
   const letterToIndex = { A: 0, B: 1, C: 2, D: 3 };
-  const stripLetterPrefix = (s) =>
-    String(s ?? "").replace(/^\s*[A-D][\)\.\:\-]\s*/i, "").trim();
+  const choices = Array.isArray(q?.choices) ? q.choices.slice(0, 4) : [];
+  const ansLetter = String(q?.answer || "").trim().toUpperCase();
+  const idx =
+    Number.isInteger(q?.answerIndex)
+      ? q.answerIndex
+      : Number.isInteger(q?.correctIndex)
+      ? q.correctIndex
+      : (ansLetter in letterToIndex ? letterToIndex[ansLetter] : 0);
 
-  parsed.questions = parsed.questions.map((q) => {
-    let { question, choices, answer, explanation } = q ?? {};
+  return {
+    question: autoWrapMath(q?.question || ""),
+    choices: choices.map(autoWrapMath),
+    answer: ansLetter || ["A","B","C","D"][idx],
+    answerIndex: idx,
+    correctIndex: idx,
+    explanation: autoWrapMath(q?.explanation || ""),
+    difficulty: q?.difficulty || "Medium",
+  };
+}
 
-    // Ensure strings
-    question = typeof question === "string" ? question : String(question ?? "");
-    explanation = typeof explanation === "string" ? explanation : String(explanation ?? "");
+/* --------------- exports ----------------- */
 
-    // Normalize choices → array of 4 plain strings (no "A. ", "B) ", etc.)
-    if (!Array.isArray(choices)) {
-      if (choices && typeof choices === "object") choices = Object.values(choices);
-      else choices = String(choices ?? "").split(/\s*[|;]\s*/);
-    }
-    choices = choices.map(stripLetterPrefix).slice(0, 4);
-    while (choices.length < 4) choices.push("N/A");
+// Tutor chat
+export async function generateChatResponse({ message, model } = {}) {
+  if (!CHAT_KEY) throw new Error("GEMINI_CHAT_API_KEY (or GOOGLE_API_KEY) is missing.");
 
-    // Determine correct index
-    let idx = -1;
-
-    // If model gave a letter like "B"
-    if (typeof answer === "string" && /^[ABCD]$/i.test(answer.trim())) {
-      idx = letterToIndex[answer.trim().toUpperCase()];
-    }
-
-    // If model gave the *text* of the correct choice, try to match by text
-    if (idx < 0 && typeof answer === "string") {
-      const ai = choices.findIndex(
-        (c) => c.toLowerCase() === answer.trim().toLowerCase()
-      );
-      if (ai >= 0) idx = ai;
-    }
-
-    // Fallback
-    if (idx < 0) idx = 0;
-
-    // Keep letter too (compatibility)
-    const letter = Object.keys(letterToIndex).find((k) => letterToIndex[k] === idx) || "A";
-
-    return {
-      question,
-      choices,
-      answer: letter,        // "A" | "B" | "C" | "D"
-      answerIndex: idx,      // 0..3  ← USE THIS FOR GRADING
-      correctIndex: idx,     // alias
-      explanation
-    };
+  const genAI = new GoogleGenerativeAI(CHAT_KEY);
+  const gModel = genAI.getGenerativeModel({
+    model: model || CHAT_MODEL,
+    generationConfig: { temperature: 0.2, topP: 0.9 }
   });
 
-  return parsed;
+  const prompt = `
+You are a friendly SAT/ACT/AP tutor.
+- Explain step-by-step but concisely.
+- When writing math, ALWAYS wrap LaTeX in $...$ (inline) or $$...$$ (display).
+Student: ${message}
+Tutor:
+  `;
+
+  const result = await gModel.generateContent(prompt);
+  const text = result?.response?.text?.() ?? "";
+  return autoWrapMath(text);
 }
 
-export async function generateQuestions({
-  testType,
-  subject,
-  topic,
-  numQuestions = 5,
-}) {
-  const genAI = new GoogleGenerativeAI(need("GEMINI_QA_API_KEY", QA_KEY));
-  const model = genAI.getGenerativeModel({ model: QA_MODEL });
+// Practice questions
+export async function generateQuestions({ testType, subject, topic, count = 5 }) {
+  if (!QA_KEY) throw new Error("GEMINI_QA_API_KEY (or GOOGLE_API_KEY) is missing.");
 
-  const n = Math.max(1, Math.min(15, Number(numQuestions) || 5));
+  const genAI = new GoogleGenerativeAI(QA_KEY);
+  const gModel = genAI.getGenerativeModel({
+    model: QA_MODEL,
+    generationConfig: { temperature: 0.3, topP: 0.9 }
+  });
 
   const prompt = `
-Create ${n} ${testType} ${subject} multiple-choice practice questions on: "${topic}".
+You create high-quality multiple-choice practice questions for standardized tests.
 
-Rules:
-- Each item has exactly 4 choices labeled A, B, C, D.
-- "answer" MUST be exactly one of: A, B, C, D (or the exact answer text).
-- "explanation" is 1–3 concise sentences.
-- Return ONLY JSON (no text, no markdown). EXACT shape:
-
+Output ONLY valid JSON in this exact shape (no prose before/after):
 {
   "questions": [
     {
-      "question": "string (may include LaTeX like $x^2$)",
-      "choices": ["A", "B", "C", "D"],
-      "answer": "A",
+      "question": "string",
+      "choices": ["string","string","string","string"],
+      "answer": "A | B | C | D",
       "explanation": "string"
     }
   ]
 }
+
+Rules:
+- "answer" MUST be one of "A","B","C","D" (uppercase).
+- Exactly 4 distinct choices.
+- Explanations are 1–3 sentences that reference why the correct choice works.
+- When you include math, always wrap LaTeX in $...$ or $$...$$.
+
+Generate ${count} questions for:
+Test Type: ${testType}
+Subject: ${subject}
+Topic: ${topic || "General"}
+Difficulty: mix of easy and medium.
 `;
 
-  let raw = "";
-  try {
-    const result = await model.generateContent({
-      contents: [{ role: "user", parts: [{ text: prompt }]}],
-      generationConfig: { responseMimeType: "application/json" }
-    });
-    raw = result?.response?.text?.() ?? "";
-  } catch {
-    const result = await model.generateContent(prompt);
-    raw = result?.response?.text?.() ?? "";
-  }
+  const result = await gModel.generateContent(prompt);
+  const text = result?.response?.text?.() ?? "";
+  const parsed = parseModelJson(text);
 
-  const parsed = extractJsonBlock(raw);
-  if (!parsed) {
-    console.error("Question JSON parse failed. Raw (first 800 chars):", String(raw).slice(0, 800));
-    throw new Error("Invalid JSON from model.");
-  }
-  return normalizeQA(parsed);
+  const raw = Array.isArray(parsed?.questions) ? parsed.questions : [];
+  const questions = raw.map(normalizeQA).filter(q => q.question && q.choices.length === 4);
+  if (questions.length === 0) throw new Error("No questions produced.");
+  return { questions };
 }
