@@ -57,19 +57,16 @@ const renderTextWithMath = (text) => {
     .replace(/\\\((.+?)\\\)/g, (_m, p1) => `$${p1}$`)
     .replace(/\\\[(.+?)\\\]/gs, (_m, p1) => `$$${p1}$$`);
 
-  // --- NEW: lightly auto-wrap *common* bare LaTeX if no $ present ---
+  // --- Light auto-wrap *common* bare LaTeX if no $ present ---
   if (!normalized.includes("$")) {
-    // Wrap \frac{…}{…}
     normalized = normalized.replace(
       /\\frac\{([^{}]+)\}\{([^{}]+)\}/g,
       (_m, a, b) => `$\\frac{${a}}{${b}}$`
     );
-    // Wrap \sqrt{…}
     normalized = normalized.replace(
       /\\sqrt\{([^{}]+)\}/g,
       (_m, a) => `$\\sqrt{${a}}$`
     );
-    // One-token commands that often appear alone
     normalized = normalized
       .replace(/\b\\pi\b/g, '$\\pi$')
       .replace(/\b\\theta\b/g, '$\\theta$')
@@ -122,7 +119,7 @@ export default function Practice() {
   const [testType, setTestType] = useState("");
   const [subject, setSubject] = useState("");
   const [topic, setTopic] = useState("");
-  const [numQuestions, setNumQuestions] = useState("5");
+  const [numQuestions, setNumQuestions] = useState("5"); // 5, 10, or 15 only
 
   const [questions, setQuestions] = useState([]);
   const [currentQuestion, setCurrentQuestion] = useState(0);
@@ -150,6 +147,9 @@ export default function Practice() {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 90000);
 
+      // 🔒 Clamp to max 15 before calling the API
+      const safeNum = Math.min(15, Math.max(1, parseInt(numQuestions, 10) || 5));
+
       const res = await fetch("/api/generate-questions", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -157,7 +157,7 @@ export default function Practice() {
           testType,
           subject,
           topic: topic || "General",
-          numQuestions: parseInt(numQuestions, 10),
+          numQuestions: safeNum,
         }),
         signal: controller.signal,
       });
@@ -196,7 +196,6 @@ export default function Practice() {
       setCurrentQuestion(0);
       setSelectedAnswers({});
       setShowResults(false);
-      // window.__QUIZ = normalized; // (optional) debug
     } catch (e) {
       if (e.name === "AbortError") {
         setError("AI is taking a while. Try again or reduce the number of questions.");
@@ -214,7 +213,6 @@ export default function Practice() {
   const selectAnswer = (qIdx, aIdx) => {
     if (showResults) return;
     setSelectedAnswers((prev) => ({ ...prev, [qIdx]: aIdx }));
-    // window.__SEL = { ...(window.__SEL||{}), [qIdx]: aIdx }; // (optional) debug
   };
 
   const submitAnswers = () => setShowResults(true);
@@ -303,7 +301,7 @@ export default function Practice() {
                       </Select>
                     </div>
 
-                    {/* Number of Questions */}
+                    {/* Number of Questions (max 15) */}
                     <div>
                       <label className="block text-sm font-medium text-gray-700 dark:text-white mb-2">
                         Number of Questions
@@ -316,7 +314,7 @@ export default function Practice() {
                           <SelectItem value="5">5 Questions</SelectItem>
                           <SelectItem value="10">10 Questions</SelectItem>
                           <SelectItem value="15">15 Questions</SelectItem>
-                          <SelectItem value="20">20 Questions</SelectItem>
+                          {/* 20 removed intentionally to reduce time & cost */}
                         </SelectContent>
                       </Select>
                     </div>
@@ -447,7 +445,7 @@ export default function Practice() {
                         variant="outline"
                         onClick={() => setCurrentQuestion(Math.max(0, currentQuestion - 1))}
                         disabled={currentQuestion === 0}
-                        className="dark:bg-black dark:border-white/50 dark:text-white"
+                        className="dark:bg黑 dark:border-white/50 dark:text-white"
                       >
                         Previous
                       </Button>
