@@ -44,21 +44,57 @@ const TOPIC_OPTIONS = {
   "Computer Science A": ["Object-Oriented Programming","Data Structures","Algorithms","Program Design"],
 };
 
-/* ---------- Math rendering (safe & simple) ---------- */
-/* We only render text already wrapped in $...$ or $$...$$.
-   No aggressive auto-conversion that can create mismatched dollars. */
+/* ---------- Math rendering (robust + conservative) ---------- */
+/* We only render text already wrapped in $...$ / $$...$$ (or LaTeX \( ... \) / \[ ... \]).
+   No aggressive auto-conversion that can corrupt normal text. */
 
 const renderTextWithMath = (text) => {
   if (text == null) return null;
   const str = String(text);
 
-  // Support LaTeX \( ... \) and \[ ... \] by normalizing to $...$ / $$...$$
-  const normalized = str
+  // Normalize \( … \) and \[ … \] to $…$ and $$…$$
+  let normalized = str
     .replace(/\\\((.+?)\\\)/g, (_m, p1) => `$${p1}$`)
     .replace(/\\\[(.+?)\\\]/gs, (_m, p1) => `$$${p1}$$`);
 
-  // Split into math/non-math chunks; allow block math to span lines
-  const parts = normalized.split(/(\$\$[\s\S]+?\$\$|\$[^$]+\$)/g);
+  // --- NEW: lightly auto-wrap *common* bare LaTeX if no $ present ---
+  if (!normalized.includes("$")) {
+    // Wrap \frac{…}{…}
+    normalized = normalized.replace(
+      /\\frac\{([^{}]+)\}\{([^{}]+)\}/g,
+      (_m, a, b) => `$\\frac{${a}}{${b}}$`
+    );
+    // Wrap \sqrt{…}
+    normalized = normalized.replace(
+      /\\sqrt\{([^{}]+)\}/g,
+      (_m, a) => `$\\sqrt{${a}}$`
+    );
+    // One-token commands that often appear alone
+    normalized = normalized
+      .replace(/\b\\pi\b/g, '$\\pi$')
+      .replace(/\b\\theta\b/g, '$\\theta$')
+      .replace(/\b\\alpha\b/g, '$\\alpha$')
+      .replace(/\b\\beta\b/g, '$\\beta$')
+      .replace(/\b\\gamma\b/g, '$\\gamma$')
+      .replace(/\b\\delta\b/g, '$\\delta$')
+      .replace(/\b\\lambda\b/g, '$\\lambda$')
+      .replace(/\b\\mu\b/g, '$\\mu$')
+      .replace(/\b\\sigma\b/g, '$\\sigma$')
+      .replace(/\b\\leq\b/g, '$\\leq$')
+      .replace(/\b\\geq\b/g, '$\\geq$')
+      .replace(/\b\\neq\b/g, '$\\neq$')
+      .replace(/\b\\ne\b/g, '$\\ne$');
+  }
+  // ---------------------------------------------------------------
+
+  // If $ are unbalanced, strip them (prevents KaTeX crash)
+  const balanced =
+    normalized.split("$").length % 2 === 1
+      ? normalized.replace(/\$/g, "")
+      : normalized;
+
+  // Split into text / $…$ / $$…$$
+  const parts = balanced.split(/(\$\$[\s\S]+?\$\$|\$[\s\S]*?\$)/g);
 
   return parts.map((part, i) => {
     if (part.startsWith("$$") && part.endsWith("$$")) {
@@ -72,7 +108,9 @@ const renderTextWithMath = (text) => {
     return (
       <span
         key={i}
-        dangerouslySetInnerHTML={{ __html: part.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>") }}
+        dangerouslySetInnerHTML={{
+          __html: part.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+        }}
       />
     );
   });
@@ -158,6 +196,7 @@ export default function Practice() {
       setCurrentQuestion(0);
       setSelectedAnswers({});
       setShowResults(false);
+      // window.__QUIZ = normalized; // (optional) debug
     } catch (e) {
       if (e.name === "AbortError") {
         setError("AI is taking a while. Try again or reduce the number of questions.");
@@ -175,6 +214,7 @@ export default function Practice() {
   const selectAnswer = (qIdx, aIdx) => {
     if (showResults) return;
     setSelectedAnswers((prev) => ({ ...prev, [qIdx]: aIdx }));
+    // window.__SEL = { ...(window.__SEL||{}), [qIdx]: aIdx }; // (optional) debug
   };
 
   const submitAnswers = () => setShowResults(true);
