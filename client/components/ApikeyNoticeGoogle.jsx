@@ -1,6 +1,6 @@
 import { CheckCircle } from "lucide-react";
 
-export default function ApiKeyNotice() {
+export default function ApiKeyNoticeGoogle() {
   return (
     <div className="mb-6 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
       <div className="flex items-start">
