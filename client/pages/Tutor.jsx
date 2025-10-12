@@ -13,7 +13,7 @@ import {
   Bot,
 } from "lucide-react";
 import Layout from "@/components/Layout";
-import ApiKeyNotice from "@/components/ApiKeyNotice";
+import ApiKeyNoticeGoogle from "@/components/ApiKeyNoticeGoogle";
 import { InlineMath, BlockMath } from "react-katex";
 
 export default function Tutor() {
@@ -251,7 +251,8 @@ export default function Tutor() {
             </p>
           </div>
 
-          <ApiKeyNotice />
+          <ApiKeyNoticeGoogle />
+
 
           {/* Chat Container */}
           <Card className="bg-white dark:bg-black border dark:border-white/30 h-[600px] flex flex-col">

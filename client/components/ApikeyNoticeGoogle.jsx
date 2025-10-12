@@ -10,7 +10,7 @@ export default function ApiKeyNotice() {
             AI Powered by Google AI Studio
           </h3>
           <p className="text-green-700 dark:text-green-400 text-sm">
-            PrepMind uses Google AI studio's language models through its API to generate practice questions and provide tutoring for SAT, ACT, and AP exams.
+            PrepMind uses Google AI studio's gemini language models through its API to generate practice questions and provide tutoring for SAT, ACT, and AP exams.
           </p>
         </div>
       </div>

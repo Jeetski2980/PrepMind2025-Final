@@ -140,10 +140,10 @@ export default function About() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
                 <div>
                   <h3 className="text-lg font-semibold mb-2 text-foreground dark:text-foreground">
-                    Meta-Llama-3.1
+                    Gemini-2.5-Flash
                   </h3>
                   <p className="text-muted-foreground dark:text-muted-foreground">
-                    Powered by state-of-the-art language models through Together AI API for intelligent question generation and explanations.
+                     Google’s fast, efficient AI model optimized for quick reasoning and smart question generation through the Gemini API.
                   </p>
                 </div>
 
@@ -214,7 +214,7 @@ export default function About() {
                   <ul className="list-disc list-inside space-y-1 text-muted-foreground dark:text-muted-foreground">
                     <li className="whitespace-nowrap">Node.js backend infrastructure.</li>
                     <li className="whitespace-nowrap">RESTful API design.</li>
-                    <li className="whitespace-nowrap">Together AI integration.</li>
+                    <li className="whitespace-nowrap">Gemini AI integration.</li>
                     <li className="whitespace-nowrap">Real-time response generation.</li>
                   </ul>
                 </div>

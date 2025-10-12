@@ -5,8 +5,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { BookOpen, CheckCircle, XCircle, Lightbulb, RotateCcw } from "lucide-react";
 import Layout from "@/components/Layout";
-import ApiKeyNotice from "@/components/ApiKeyNotice";
+import ApiKeyNoticeGoogle from "@/components/ApiKeyNoticeGoogle";
 import { InlineMath, BlockMath } from "react-katex";
+import "katex/dist/katex.min.css";
+
 
 /* ---------- Config ---------- */
 
@@ -48,70 +50,53 @@ const TOPIC_OPTIONS = {
 /* We only render text already wrapped in $...$ / $$...$$ (or LaTeX \( ... \) / \[ ... \]).
    No aggressive auto-conversion that can corrupt normal text. */
 
-const renderTextWithMath = (text) => {
-  if (text == null) return null;
-  const str = String(text);
+// REPLACE the whole renderTextWithMath with this version
+function renderTextWithMath(input) {
+  if (input == null) return null;
+  let text = String(input);
 
-  // Normalize \( … \) and \[ … \] to $…$ and $$…$$
-  let normalized = str
-    .replace(/\\\((.+?)\\\)/g, (_m, p1) => `$${p1}$`)
-    .replace(/\\\[(.+?)\\\]/gs, (_m, p1) => `$$${p1}$$`);
+  // Normalize \( ... \) and \[ ... \] into $...$ and $$...$$
+  text = text
+    .replace(/\\\(([^\n]+?)\\\)/g, (_m, p1) => `$${p1}$`)
+    .replace(/\\\[([\s\S]+?)\\\]/g, (_m, p1) => `$$${p1}$$`);
 
-  // --- Light auto-wrap *common* bare LaTeX if no $ present ---
-  if (!normalized.includes("$")) {
-    normalized = normalized.replace(
-      /\\frac\{([^{}]+)\}\{([^{}]+)\}/g,
-      (_m, a, b) => `$\\frac{${a}}{${b}}$`
-    );
-    normalized = normalized.replace(
-      /\\sqrt\{([^{}]+)\}/g,
-      (_m, a) => `$\\sqrt{${a}}$`
-    );
-    normalized = normalized
-      .replace(/\b\\pi\b/g, '$\\pi$')
-      .replace(/\b\\theta\b/g, '$\\theta$')
-      .replace(/\b\\alpha\b/g, '$\\alpha$')
-      .replace(/\b\\beta\b/g, '$\\beta$')
-      .replace(/\b\\gamma\b/g, '$\\gamma$')
-      .replace(/\b\\delta\b/g, '$\\delta$')
-      .replace(/\b\\lambda\b/g, '$\\lambda$')
-      .replace(/\b\\mu\b/g, '$\\mu$')
-      .replace(/\b\\sigma\b/g, '$\\sigma$')
-      .replace(/\b\\leq\b/g, '$\\leq$')
-      .replace(/\b\\geq\b/g, '$\\geq$')
-      .replace(/\b\\neq\b/g, '$\\neq$')
-      .replace(/\b\\ne\b/g, '$\\ne$');
+  // Auto-wrap common LaTeX *segments* if they appear without $...$
+  // Fractions and roots
+  text = text.replace(/\\frac\{[^{}]+\}\{[^{}]+\}/g, (m) => `$${m}$`);
+  text = text.replace(/\\sqrt\{[^{}]+\}/g, (m) => `$${m}$`);
+
+  // Integrals like "\int (3x^2 - 2x + 5) dx"
+  text = text.replace(/\\int[\s\S]*?dx/g, (m) => `$${m}$`);
+
+  // Common symbols (leave surrounding text alone)
+  text = text.replace(/\b\\(pi|theta|alpha|beta|gamma|delta|lambda|mu|sigma|leq|geq|neq|ne)\b/g, (m) => `$${m}$`);
+
+  // Simple exponent tokens like x^2 that often come bare
+  text = text.replace(/(^|[\s(=+\-*/])([A-Za-z]\^\d+)(?=([\s).,;:=+\-*/]|$))/g,
+    (_m, pre, body) => `${pre}$${body}$`
+  );
+
+  // If $ are unbalanced, strip them to avoid KaTeX crashes
+  if (text.split("$").length % 2 === 0) {
+    text = text.replace(/\$/g, "");
   }
-  // ---------------------------------------------------------------
 
-  // If $ are unbalanced, strip them (prevents KaTeX crash)
-  const balanced =
-    normalized.split("$").length % 2 === 1
-      ? normalized.replace(/\$/g, "")
-      : normalized;
-
-  // Split into text / $…$ / $$…$$
-  const parts = balanced.split(/(\$\$[\s\S]+?\$\$|\$[\s\S]*?\$)/g);
+  // Split into plain vs math ($...$ or $$...$$) and render
+  const parts = text.split(/(\$\$[\s\S]+?\$\$|\$[^$]+\$)/g);
 
   return parts.map((part, i) => {
     if (part.startsWith("$$") && part.endsWith("$$")) {
       const math = part.slice(2, -2);
-      try { return <BlockMath key={i} math={math} />; } catch { return <span key={i}>{part}</span>; }
+      try { return <BlockMath key={i}>{math}</BlockMath>; } catch { return <span key={i}>{part}</span>; }
     }
     if (part.startsWith("$") && part.endsWith("$")) {
       const math = part.slice(1, -1);
-      try { return <InlineMath key={i} math={math} />; } catch { return <span key={i}>{part}</span>; }
+      try { return <InlineMath key={i}>{math}</InlineMath>; } catch { return <span key={i}>{part}</span>; }
     }
-    return (
-      <span
-        key={i}
-        dangerouslySetInnerHTML={{
-          __html: part.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
-        }}
-      />
-    );
+    return <span key={i}>{part}</span>;
   });
-};
+}
+
 
 /* ---------- Page ---------- */
 
@@ -257,8 +242,8 @@ export default function Practice() {
 
           {questions.length === 0 ? (
             <div>
-              <ApiKeyNotice />
-
+              <ApiKeyNoticeGoogle />
+            
               <Card className="bg-white dark:bg-black border dark:border-white/20">
                 <CardHeader>
                   <CardTitle className="text-gray-900 dark:text-white">Choose Your Test</CardTitle>
