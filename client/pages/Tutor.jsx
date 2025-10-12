@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
+import ApiKeyNoticeGoogle from "@/components/ApiKeyNoticeGoogle";
 import {
   MessageSquare,
   Send,
