@@ -14,8 +14,8 @@ import {
   Bot,
 } from "lucide-react";
 import Layout from "@/components/Layout";
-import ApiKeyNoticeGoogle from "@/components/ApiKeyNoticeGoogle";
 import { InlineMath, BlockMath } from "react-katex";
+import "katex/dist/katex.min.css";
 
 export default function Tutor() {
   const [messages, setMessages] = useState([
@@ -31,7 +31,7 @@ export default function Tutor() {
   const [isLoading, setIsLoading] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
-  const [shouldAutoScroll, setShouldAutoScroll] = useState(true); // start true
+  const [shouldAutoScroll, setShouldAutoScroll] = useState(true);
 
   const messagesContainerRef = useRef(null);
   const recognitionRef = useRef(null);
@@ -208,6 +208,10 @@ export default function Tutor() {
     const parts = safe.split(mathRegex);
 
     return parts.map((part, i) => {
+      if (part.startsWith("$$") && part.endsWith("$")) {
+        // guard for malformed $$...$ segments
+        return <span key={i}>{part}</span>;
+      }
       if (part.startsWith("$$") && part.endsWith("$$")) {
         const mathContent = part.slice(2, -2);
         try {
@@ -253,7 +257,6 @@ export default function Tutor() {
           </div>
 
           <ApiKeyNoticeGoogle />
-
 
           {/* Chat Container */}
           <Card className="bg-white dark:bg-black border dark:border-white/30 h-[600px] flex flex-col">
