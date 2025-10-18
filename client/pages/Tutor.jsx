@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
-import ApiKeyNoticeGoogle from "@/components/ApiKeyNoticeGoogle";
+import ApiKeyNoticeGoogle from "@/components/ApiKeyNoticeGoogle.jsx";
 import {
   MessageSquare,
   Send,
@@ -182,7 +182,7 @@ export default function Tutor() {
     }
   };
 
-  // Rendering helpers (safe coercions)
+  // Render helpers
   const renderMessageContent = (text) => {
     const safeText = typeof text === "string" ? text : String(text ?? "");
     const parts = safeText.split(/(<highlight>.*?<\/highlight>)/g);
@@ -202,42 +202,57 @@ export default function Tutor() {
     });
   };
 
+  // Robust KaTeX renderer (supports multi-line $$…$$ and \(…\)/\[…\])
   const renderTextWithMath = (text) => {
-    const safe = typeof text === "string" ? text : String(text ?? "");
-    const mathRegex = /(\$\$[^$]+\$\$|\$[^$]+\$)/g;
-    const parts = safe.split(mathRegex);
+  if (text == null) return null;
+  let s = String(text);
 
-    return parts.map((part, i) => {
-      if (part.startsWith("$$") && part.endsWith("$")) {
-        // guard for malformed $$...$ segments
-        return <span key={i}>{part}</span>;
-      }
-      if (part.startsWith("$$") && part.endsWith("$$")) {
-        const mathContent = part.slice(2, -2);
-        try {
-          return <BlockMath key={i} math={mathContent} />;
-        } catch {
-          return <span key={i}>{part}</span>;
-        }
-      } else if (part.startsWith("$") && part.endsWith("$")) {
-        const mathContent = part.slice(1, -1);
-        try {
-          return <InlineMath key={i} math={mathContent} />;
-        } catch {
-          return <span key={i}>{part}</span>;
-        }
-      } else {
-        return (
-          <span
-            key={i}
-            dangerouslySetInnerHTML={{
-              __html: part.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>"),
-            }}
-          />
-        );
-      }
-    });
-  };
+  // Normalize \( … \) and \[ … \] to $…$ and $$…$$
+  s = s
+    .replace(/\\\((.+?)\\\)/g, (_m, p1) => `$${p1}$`)
+    .replace(/\\\[(.+?)\\\]/gs, (_m, p1) => `$$${p1}$$`);
+
+  // If there are no $ at all, lightly auto-wrap common LaTeX
+  if (!s.includes("$")) {
+    s = s
+      // \frac{a}{b} -> $\frac{a}{b}$
+      .replace(/\\frac\{([^{}]+)\}\{([^{}]+)\}/g, (_m, a, b) => `$\\frac{${a}}{${b}}$`)
+      // \sqrt{x} -> $\sqrt{x}$
+      .replace(/\\sqrt\{([^{}]+)\}/g, (_m, a) => `$\\sqrt{${a}}$`)
+      // single tokens -> $token$
+      .replace(/\b\\(pi|theta|alpha|beta|gamma|delta|lambda|mu|sigma|leq|geq|neq|ne)\b/g,
+        (_m, cmd) => `$\\${cmd}$`
+      );
+  }
+
+  // If $ are unbalanced, strip them to avoid KaTeX crashes
+  const balanced = s.split("$").length % 2 === 1 ? s.replace(/\$/g, "") : s;
+
+  // Robust split for multi-line $$…$$ and single-line $…$
+  const parts = balanced.split(/(\$\$[\s\S]+?\$\$|\$[\s\S]*?\$)/g);
+
+  return parts.map((part, i) => {
+    if (part.startsWith("$$") && part.endsWith("$$")) {
+      const math = part.slice(2, -2).trim();
+      try { return <BlockMath key={i} math={math} />; }
+      catch { return <span key={i}>{part}</span>; }
+    }
+    if (part.startsWith("$") && part.endsWith("$")) {
+      const math = part.slice(1, -1).trim();
+      try { return <InlineMath key={i} math={math} />; }
+      catch { return <span key={i}>{part}</span>; }
+    }
+    return (
+      <span
+        key={i}
+        dangerouslySetInnerHTML={{
+          __html: part.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+        }}
+      />
+    );
+  });
+};
+
 
   return (
     <Layout>
