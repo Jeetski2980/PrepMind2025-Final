@@ -48,7 +48,7 @@ const TOPIC_OPTIONS = {
 /* ---------- Robust math rendering with nested-brace auto-wrap ---------- */
 /* ---------- Math rendering (robust + conservative) ---------- */
 /* Fixes common missing-backslash LaTeX and renders with KaTeX. */
-import { InlineMath, BlockMath } from "react-katex";
+
 import "katex/dist/katex.min.css";
 
 const renderTextWithMath = (text) => {
