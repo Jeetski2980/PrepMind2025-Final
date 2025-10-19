@@ -5,11 +5,9 @@ import cors from "cors";
 import path from "path";
 import { fileURLToPath } from "url";
 
-// --- Your route handlers ---
 import { generateChatResponse } from "./routes/chat.js";
 import { generateQuestions } from "./routes/questions.js";
 
-// __dirname for ESM
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -19,7 +17,7 @@ const PORT = Number(process.env.PORT || 10000);
 app.use(cors());
 app.use(express.json());
 
-// --- (Optional) request logging to confirm traffic hits this service ---
+// --- Debug logging (leave on for now) ---
 app.use((req, _res, next) => {
   console.log(`[REQ] ${req.method} ${req.url}`);
   next();
@@ -60,19 +58,23 @@ app.post("/api/generate-questions", async (req, res) => {
 /* =========================
    STATIC + SPA FALLBACK
    ========================= */
-// Serve the Vite build output
 const distDir = path.resolve(__dirname, "../dist");
-app.use(express.static(distDir));
 
-// Explicit root (helps some proxies/CDNs)
-app.get("/", (_req, res) => {
-  res.sendFile(path.join(distDir, "index.html"));
-});
+// Serve static files (JS/CSS/fonts)
+app.use(express.static(distDir, { extensions: ["html"] }));
 
-// SPA fallback for all non-API routes
-app.get(/^\/(?!api).*/, (_req, res) => {
+// Helper to send index.html
+const sendIndex = (_req, res) => {
   res.sendFile(path.join(distDir, "index.html"));
-});
+};
+
+// Explicit root handlers
+app.get("/", sendIndex);
+app.head("/", (_req, res) => res.sendStatus(200)); // handle HEAD /
+
+// SPA fallback for any non-API path (GET or HEAD)
+app.get(/^\/(?!api).*/, sendIndex);
+app.head(/^\/(?!api).*/, (_req, res) => res.sendStatus(200));
 
 /* =========================
    START SERVER
