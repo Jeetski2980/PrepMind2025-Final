@@ -2,15 +2,19 @@ import { CheckCircle } from "lucide-react";
 
 export default function ApiKeyNoticeGoogle() {
   return (
-    <div className="mb-6 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
-      <div className="flex items-start">
-        <CheckCircle className="h-5 w-5 text-green-600 dark:text-green-400 mt-0.5 mr-3" />
+    <div className="mb-6 rounded-xl border border-emerald-200/70 bg-emerald-50 px-4 py-3 dark:border-emerald-400/30 dark:bg-emerald-400/10">
+      <div className="flex items-start gap-3">
+        <div className="mt-0.5">
+          <CheckCircle className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+        </div>
         <div>
-          <h3 className="text-green-800 dark:text-green-300 font-medium mb-2">
-            AI Powered by Google AI Studio
-          </h3>
-          <p className="text-green-700 dark:text-green-400 text-sm">
-            PrepMind uses Google AI studio's gemini language models through its API to generate practice questions and provide tutoring for SAT, ACT, and AP exams.
+          <p className="font-semibold text-emerald-800 dark:text-emerald-300">
+            AI Powered by Google Gemini
+          </p>
+          <p className="mt-1 text-emerald-900/80 dark:text-emerald-200/80">
+            PrepMind uses Google’s Gemini models through its API to generate
+            practice questions and provide live tutoring for SAT, ACT, and AP
+            exams.
           </p>
         </div>
       </div>

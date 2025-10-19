@@ -2,17 +2,8 @@ import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
-import ApiKeyNoticeGoogle from "@/components/ApiKeyNoticeGoogle.jsx";
-import {
-  MessageSquare,
-  Send,
-  Mic,
-  MicOff,
-  Volume2,
-  VolumeX,
-  User,
-  Bot,
-} from "lucide-react";
+import ApiKeyNoticeGoogle from "@/components/ApiKeyNoticeGoogle";
+import { MessageSquare, Send, Mic, MicOff, Volume2, VolumeX, User, Bot } from "lucide-react";
 import Layout from "@/components/Layout";
 import { InlineMath, BlockMath } from "react-katex";
 import "katex/dist/katex.min.css";
@@ -37,35 +28,26 @@ export default function Tutor() {
   const recognitionRef = useRef(null);
   const synthRef = useRef(null);
 
-  // Only scroll the chat container (not the page)
   const scrollToBottom = () => {
     const el = messagesContainerRef.current;
     if (!el) return;
     el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
   };
-
-  // Track when user is near bottom so we only auto-scroll then
   const checkScrollPosition = () => {
     const el = messagesContainerRef.current;
     if (!el) return;
     const isNearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 100;
     setShouldAutoScroll(isNearBottom);
   };
+  useEffect(() => { if (shouldAutoScroll) scrollToBottom(); }, [messages, shouldAutoScroll]);
 
   useEffect(() => {
-    if (shouldAutoScroll) scrollToBottom();
-  }, [messages, shouldAutoScroll]);
-
-  useEffect(() => {
-    // Speech recognition
     if ("webkitSpeechRecognition" in window || "SpeechRecognition" in window) {
-      const SpeechRecognition =
-        window.webkitSpeechRecognition || window.SpeechRecognition;
+      const SpeechRecognition = window.webkitSpeechRecognition || window.SpeechRecognition;
       recognitionRef.current = new SpeechRecognition();
       recognitionRef.current.continuous = false;
       recognitionRef.current.interimResults = false;
       recognitionRef.current.lang = "en-US";
-
       recognitionRef.current.onresult = (e) => {
         const transcript = e.results[0][0].transcript;
         setInputText(transcript);
@@ -74,46 +56,25 @@ export default function Tutor() {
       recognitionRef.current.onend = () => setIsListening(false);
       recognitionRef.current.onerror = () => setIsListening(false);
     }
-
-    // Speech synthesis
     synthRef.current = window.speechSynthesis;
-
-    return () => {
-      recognitionRef.current?.stop();
-      synthRef.current?.cancel();
-    };
+    return () => { recognitionRef.current?.stop(); synthRef.current?.cancel(); };
   }, []);
 
-  const startListening = () => {
-    if (recognitionRef.current && !isListening) {
-      setIsListening(true);
-      recognitionRef.current.start();
-    }
-  };
-  const stopListening = () => {
-    recognitionRef.current?.stop();
-    setIsListening(false);
-  };
-
+  const startListening = () => { if (recognitionRef.current && !isListening) { setIsListening(true); recognitionRef.current.start(); } };
+  const stopListening = () => { recognitionRef.current?.stop(); setIsListening(false); };
   const speakText = (text) => {
     const safe = typeof text === "string" ? text : String(text ?? "");
     if (synthRef.current && !isSpeaking && safe) {
       const u = new SpeechSynthesisUtterance(safe);
-      u.rate = 0.9;
-      u.pitch = 1;
-      u.volume = 0.8;
+      u.rate = 0.9; u.pitch = 1; u.volume = 0.8;
       u.onstart = () => setIsSpeaking(true);
       u.onend = () => setIsSpeaking(false);
       u.onerror = () => setIsSpeaking(false);
       synthRef.current.speak(u);
     }
   };
-  const stopSpeaking = () => {
-    synthRef.current?.cancel();
-    setIsSpeaking(false);
-  };
+  const stopSpeaking = () => { synthRef.current?.cancel(); setIsSpeaking(false); };
 
-  // Safe chat call; always returns a string and accepts multiple response shapes
   async function sendChat(userText) {
     try {
       const res = await fetch("/api/chat", {
@@ -138,12 +99,7 @@ export default function Tutor() {
     const trimmed = inputText.trim();
     if (!trimmed || isLoading) return;
 
-    const userMessage = {
-      id: Date.now(),
-      text: trimmed,
-      isUser: true,
-      timestamp: new Date(),
-    };
+    const userMessage = { id: Date.now(), text: trimmed, isUser: true, timestamp: new Date() };
     setMessages((prev) => [...prev, userMessage]);
     setInputText("");
     setIsLoading(true);
@@ -152,10 +108,7 @@ export default function Tutor() {
       const replyText = await sendChat(userMessage.text);
       const aiMessage = {
         id: Date.now() + 1,
-        text:
-          typeof replyText === "string"
-            ? replyText
-            : JSON.stringify(replyText ?? ""),
+        text: typeof replyText === "string" ? replyText : JSON.stringify(replyText ?? ""),
         isUser: false,
         timestamp: new Date(),
       };
@@ -163,82 +116,49 @@ export default function Tutor() {
     } catch {
       setMessages((prev) => [
         ...prev,
-        {
-          id: Date.now() + 1,
-          text:
-            "I'm sorry, I'm having trouble connecting right now. Please try again later.",
-          isUser: false,
-          timestamp: new Date(),
-        },
+        { id: Date.now() + 1, text: "I'm sorry, I'm having trouble connecting right now. Please try again later.", isUser: false, timestamp: new Date() },
       ]);
     }
     setIsLoading(false);
   };
 
-  const handleKeyDown = (e) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      sendMessage();
-    }
-  };
+  const handleKeyDown = (e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); } };
 
-  // Render helpers
-  const renderMessageContent = (text) => {
-    const safeText = typeof text === "string" ? text : String(text ?? "");
-    const parts = safeText.split(/(<highlight>.*?<\/highlight>)/g);
-    return parts.map((part, i) => {
-      if (part.startsWith("<highlight>") && part.endsWith("</highlight>")) {
-        const content = part.slice(11, -12);
-        return (
-          <span
-            key={i}
-            className="bg-yellow-200 dark:bg-yellow-600/30 px-1 py-0.5 rounded"
-          >
-            {renderTextWithMath(content)}
-          </span>
-        );
-      }
-      return <span key={i}>{renderTextWithMath(part)}</span>;
-    });
-  };
-
-  // Robust KaTeX renderer (supports multi-line $$…$$ and \(…\)/\[…\])
-  const renderTextWithMath = (text) => {
+  // ---------- SAME robust renderer as Practice.jsx ----------
+ /* ---------- Math rendering (robust + safe) ---------- */
+const renderTextWithMath = (text) => {
   if (text == null) return null;
   let s = String(text);
 
-  // Normalize \( … \) and \[ … \] to $…$ and $$…$$
+  // Normalize \( ... \) and \[ ... \]
   s = s
-    .replace(/\\\((.+?)\\\)/g, (_m, p1) => `$${p1}$`)
-    .replace(/\\\[(.+?)\\\]/gs, (_m, p1) => `$$${p1}$$`);
+    .replace(/\\\(([\s\S]+?)\\\)/g, (_m, p1) => `$${p1}$`)
+    .replace(/\\\[([\s\S]+?)\\\]/g, (_m, p1) => `$$${p1}$$`);
 
-  // If there are no $ at all, lightly auto-wrap common LaTeX
   if (!s.includes("$")) {
-    s = s
-      // \frac{a}{b} -> $\frac{a}{b}$
-      .replace(/\\frac\{([^{}]+)\}\{([^{}]+)\}/g, (_m, a, b) => `$\\frac{${a}}{${b}}$`)
-      // \sqrt{x} -> $\sqrt{x}$
-      .replace(/\\sqrt\{([^{}]+)\}/g, (_m, a) => `$\\sqrt{${a}}$`)
-      // single tokens -> $token$
-      .replace(/\b\\(pi|theta|alpha|beta|gamma|delta|lambda|mu|sigma|leq|geq|neq|ne)\b/g,
-        (_m, cmd) => `$\\${cmd}$`
-      );
+    if (/^\s*\\[A-Za-z]/.test(s.trim())) {
+      s = `$${s}$`;
+    } else {
+      const CHUNK =
+        /(\\frac\{[^{}]+\}\{[^{}]+\}|\\sqrt\{[^{}]+\}|\\hat\{[^{}]+\}|\\bar\{[^{}]+\}|\\vec\{[^{}]+\}|\\int[^ \n]*|\\sum[^ \n]*|\\lim[^ \n]*|\\log(?:_[^{\s]+|\([^)]*\))?|\\sin|\\cos|\\tan|\\pi|\\theta|\\alpha|\\beta|\\gamma|\\delta|\\lambda|\\mu|\\sigma|\\leq|\\geq|\\neq|\\ne)/g;
+      s = s.replace(CHUNK, (m) => `$${m}$`);
+    }
   }
 
-  // If $ are unbalanced, strip them to avoid KaTeX crashes
-  const balanced = s.split("$").length % 2 === 1 ? s.replace(/\$/g, "") : s;
+  if (s.split("$").length % 2 === 0) {
+    s = s.replace(/\$/g, "");
+  }
 
-  // Robust split for multi-line $$…$$ and single-line $…$
-  const parts = balanced.split(/(\$\$[\s\S]+?\$\$|\$[\s\S]*?\$)/g);
+  const parts = s.split(/(\$\$[\s\S]+?\$\$|\$[\s\S]+?\$)/g);
 
   return parts.map((part, i) => {
     if (part.startsWith("$$") && part.endsWith("$$")) {
-      const math = part.slice(2, -2).trim();
+      const math = part.slice(2, -2);
       try { return <BlockMath key={i} math={math} />; }
       catch { return <span key={i}>{part}</span>; }
     }
     if (part.startsWith("$") && part.endsWith("$")) {
-      const math = part.slice(1, -1).trim();
+      const math = part.slice(1, -1);
       try { return <InlineMath key={i} math={math} />; }
       catch { return <span key={i}>{part}</span>; }
     }
@@ -253,6 +173,21 @@ export default function Tutor() {
   });
 };
 
+  const renderMessageContent = (text) => {
+    const safeText = typeof text === "string" ? text : String(text ?? "");
+    const parts = safeText.split(/(<highlight>.*?<\/highlight>)/g);
+    return parts.map((part, i) => {
+      if (part.startsWith("<highlight>") && part.endsWith("</highlight>")) {
+        const content = part.slice(11, -12);
+        return (
+          <span key={i} className="bg-yellow-200 dark:bg-yellow-600/30 px-1 py-0.5 rounded">
+            {renderTextWithMath(content)}
+          </span>
+        );
+      }
+      return <span key={i}>{renderTextWithMath(part)}</span>;
+    });
+  };
 
   return (
     <Layout>
@@ -263,9 +198,7 @@ export default function Tutor() {
             <div className="w-16 h-16 bg-emerald-100 dark:bg-emerald-400/10 rounded-full flex items-center justify-center mx-auto mb-4">
               <MessageSquare className="w-8 h-8 text-emerald-600 dark:text-emerald-400" />
             </div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-              Your AI Tutor
-            </h1>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Your AI Tutor</h1>
             <p className="text-gray-600 dark:text-white/70">
               Ask me anything about test prep. Try typing or using your voice.
             </p>
@@ -282,33 +215,16 @@ export default function Tutor() {
               onScroll={checkScrollPosition}
             >
               {messages.map((message) => (
-                <div
-                  key={message.id}
-                  className={`flex ${
-                    message.isUser ? "justify-end" : "justify-start"
-                  }`}
-                >
-                  <div
-                    className={`max-w-[80%] flex items-start space-x-3 ${
-                      message.isUser ? "flex-row-reverse space-x-reverse" : ""
-                    }`}
-                  >
-                    {/* Avatar */}
+                <div key={message.id} className={`flex ${message.isUser ? "justify-end" : "justify-start"}`}>
+                  <div className={`max-w-[80%] flex items-start space-x-3 ${message.isUser ? "flex-row-reverse space-x-reverse" : ""}`}>
                     <div
                       className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
-                        message.isUser
-                          ? "bg-white dark:bg-white text-emerald-600 dark:text-black"
-                          : "bg-emerald-400 dark:bg-emerald-400 text-white dark:text-black"
+                        message.isUser ? "bg-white dark:bg-white text-emerald-600 dark:text-black" : "bg-emerald-400 dark:bg-emerald-400 text-white dark:text-black"
                       }`}
                     >
-                      {message.isUser ? (
-                        <User className="w-4 h-4" />
-                      ) : (
-                        <Bot className="w-4 h-4" />
-                      )}
+                      {message.isUser ? <User className="w-4 h-4" /> : <Bot className="w-4 h-4" />}
                     </div>
 
-                    {/* Message Bubble */}
                     <div
                       className={`p-4 rounded-2xl ${
                         message.isUser
@@ -316,23 +232,15 @@ export default function Tutor() {
                           : "bg-white dark:bg-black border dark:border-white/30 text-gray-900 dark:text-white rounded-bl-md"
                       }`}
                     >
-                      <div className="whitespace-pre-wrap">
-                        {renderMessageContent(message.text)}
-                      </div>
+                      <div className="whitespace-pre-wrap">{renderMessageContent(message.text)}</div>
                       {!message.isUser && (
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() =>
-                            isSpeaking ? stopSpeaking() : speakText(message.text)
-                          }
+                          onClick={() => (isSpeaking ? stopSpeaking() : speakText(message.text))}
                           className="mt-2 p-1 h-6 w-6 hover:bg-gray-100 dark:hover:bg-white/10"
                         >
-                          {isSpeaking ? (
-                            <VolumeX className="w-3 h-3" />
-                          ) : (
-                            <Volume2 className="w-3 h-3" />
-                          )}
+                          {isSpeaking ? <VolumeX className="w-3 h-3" /> : <Volume2 className="w-3 h-3" />}
                         </Button>
                       )}
                     </div>
@@ -349,14 +257,8 @@ export default function Tutor() {
                     <div className="bg-white dark:bg-black border dark:border-white/30 p-4 rounded-2xl rounded-bl-md">
                       <div className="flex space-x-1">
                         <div className="w-2 h-2 bg-gray-400 dark:bg-white/50 rounded-full animate-bounce" />
-                        <div
-                          className="w-2 h-2 bg-gray-400 dark:bg-white/50 rounded-full animate-bounce"
-                          style={{ animationDelay: "0.1s" }}
-                        />
-                        <div
-                          className="w-2 h-2 bg-gray-400 dark:bg-white/50 rounded-full animate-bounce"
-                          style={{ animationDelay: "0.2s" }}
-                        />
+                        <div className="w-2 h-2 bg-gray-400 dark:bg-white/50 rounded-full animate-bounce" style={{ animationDelay: "0.1s" }} />
+                        <div className="w-2 h-2 bg-gray-400 dark:bg-white/50 rounded-full animate-bounce" style={{ animationDelay: "0.2s" }} />
                       </div>
                     </div>
                   </div>
@@ -386,11 +288,7 @@ export default function Tutor() {
                         : "text-gray-500 dark:text-white hover:text-emerald-600 dark:hover:text-emerald-400"
                     }`}
                   >
-                    {isListening ? (
-                      <MicOff className="w-4 h-4" />
-                    ) : (
-                      <Mic className="w-4 h-4" />
-                    )}
+                    {isListening ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
                   </Button>
                 </div>
                 <Button

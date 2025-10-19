@@ -116,8 +116,7 @@ export default function About() {
                   <div className="flip-front-content">
                     <h3 className="text-xl font-semibold mb-4 text-white">Student-Focused</h3>
                     <p className="text-gray-300 leading-relaxed">
-                      Built by educators who understand the challenges students face, PrepMind adapts
-                      to individual learning styles and provides personalized guidance.
+                      Built with purpose, not account or databases—PrepMind runs efficiently to stay free for every sutdent, ensuring equal access and opportunity for all learns.
                     </p>
                   </div>
                 </div>
